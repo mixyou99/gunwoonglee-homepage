@@ -1634,7 +1634,11 @@
             <label>Institution</label>
             <input value="${esc(item.institution)}" onchange="updateCvField('${section}', ${i}, 'institution', this.value)">
           </div>
-          <button class="btn btn-sm btn-danger" onclick="deleteCvItem('${section}', ${i})" style="align-self:flex-end;">&#10005;</button>
+          <div style="display:flex;gap:2px;align-self:flex-end;">
+            ${i > 0 ? `<button class="btn btn-sm" onclick="moveCvItem('${section}', ${i}, -1)" title="Move up">&uarr;</button>` : ''}
+            ${i < items.length - 1 ? `<button class="btn btn-sm" onclick="moveCvItem('${section}', ${i}, 1)" title="Move down">&darr;</button>` : ''}
+            <button class="btn btn-sm btn-danger" onclick="deleteCvItem('${section}', ${i})">&#10005;</button>
+          </div>
         </div>
       `).join('');
     }
@@ -1657,6 +1661,8 @@
           </div>
           <div style="display:flex;align-items:center;gap:4px;align-self:flex-end;">
             <label style="font-size:11px;white-space:nowrap;"><input type="checkbox" ${item.current ? 'checked' : ''} onchange="updateCvField('positions', ${i}, 'current', this.checked)"> Current</label>
+            ${i > 0 ? `<button class="btn btn-sm" onclick="moveCvItem('positions', ${i}, -1)" title="Move up">&uarr;</button>` : ''}
+            ${i < items.length - 1 ? `<button class="btn btn-sm" onclick="moveCvItem('positions', ${i}, 1)" title="Move down">&darr;</button>` : ''}
             <button class="btn btn-sm btn-danger" onclick="deleteCvItem('positions', ${i})">&#10005;</button>
           </div>
         </div>
@@ -1668,6 +1674,8 @@
       el.innerHTML = items.map((item, i) => `
         <div class="cv-list-item">
           <input value="${esc(item)}" onchange="updateCvListValue('${section}', ${i}, this.value)">
+          ${i > 0 ? `<button class="btn btn-sm" onclick="moveCvListItem('${section}', ${i}, -1)" title="Move up">&uarr;</button>` : ''}
+          ${i < items.length - 1 ? `<button class="btn btn-sm" onclick="moveCvListItem('${section}', ${i}, 1)" title="Move down">&darr;</button>` : ''}
           <button class="btn btn-sm btn-danger" onclick="deleteCvListItem('${section}', ${i})">&#10005;</button>
         </div>
       `).join('');
@@ -1696,6 +1704,24 @@
       if (!data.cv[section]) data.cv[section] = [];
       data.cv[section].push('');
       renderCv();
+    }
+
+    function moveCvItem(section, index, direction) {
+      const arr = data.cv[section];
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= arr.length) return;
+      [arr[index], arr[newIndex]] = [arr[newIndex], arr[index]];
+      renderCv();
+      saveData();
+    }
+
+    function moveCvListItem(section, index, direction) {
+      const arr = data.cv[section];
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= arr.length) return;
+      [arr[index], arr[newIndex]] = [arr[newIndex], arr[index]];
+      renderCv();
+      saveData();
     }
 
     function deleteCvItem(section, index) {
