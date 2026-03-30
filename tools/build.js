@@ -120,8 +120,10 @@ function generateLabHtml(members) {
     const alumniItems = groupAlumni.map(a => {
       const name = escapeHtml(a.name || '');
       const placement = a.placement || '';
-      if (placement) {
-        return `              <li><strong>${name}</strong> — ${escapeHtml(placement)}</li>`;
+      const gradYear = a.gradYear || '';
+      const details = [gradYear, placement].filter(Boolean).join(', ');
+      if (details) {
+        return `              <li><strong>${name}</strong> — ${escapeHtml(details)}</li>`;
       }
       return `              <li><strong>${name}</strong></li>`;
     }).join('\n');

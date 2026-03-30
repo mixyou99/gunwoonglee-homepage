@@ -1083,6 +1083,10 @@
           <label>Placement</label>
           <input type="text" id="memberPlacement" placeholder="e.g., Assistant Professor, Seoul National University">
         </div>
+        <div class="form-group" id="gradYearGroup" style="display:none;">
+          <label>Graduation Year</label>
+          <input type="text" id="memberGradYear" placeholder="e.g., 2024">
+        </div>
         <div class="form-group">
           <label>Publications (one per line)</label>
           <textarea id="memberPubs" rows="4" placeholder="Publication 1&#10;Publication 2"></textarea>
@@ -1336,8 +1340,8 @@
            </div>`
         : '';
 
-      const placementHtml = m.placement
-        ? `<div class="member-placement">${esc(m.placement)}</div>`
+      const placementHtml = m.placement || m.gradYear
+        ? `<div class="member-placement">${m.gradYear ? `<span style="color:var(--crimson);font-weight:600;margin-right:6px;">${esc(m.gradYear)}</span>` : ''}${esc(m.placement)}</div>`
         : '';
 
       const graduateBtn = isCurrent
@@ -1439,6 +1443,7 @@
       document.getElementById('memberStatus').value = member ? member.status : 'current';
       document.getElementById('memberTopic').value = member ? member.topic : '';
       document.getElementById('memberPlacement').value = member ? member.placement : '';
+      document.getElementById('memberGradYear').value = member ? (member.gradYear || '') : '';
       document.getElementById('memberPubs').value = member && member.pubs ? member.pubs.join('\n') : '';
       togglePlacement();
       document.getElementById('memberModalOverlay').classList.add('active');
@@ -1451,7 +1456,9 @@
     document.getElementById('memberStatus').addEventListener('change', togglePlacement);
     function togglePlacement() {
       const status = document.getElementById('memberStatus').value;
-      document.getElementById('placementGroup').style.display = status === 'alumni' ? 'block' : 'none';
+      const isAlumni = status === 'alumni';
+      document.getElementById('placementGroup').style.display = isAlumni ? 'block' : 'none';
+      document.getElementById('gradYearGroup').style.display = isAlumni ? 'block' : 'none';
     }
 
     function editMember(id) {
@@ -1467,6 +1474,7 @@
         status: document.getElementById('memberStatus').value,
         topic: document.getElementById('memberTopic').value.trim(),
         placement: document.getElementById('memberPlacement').value.trim(),
+        gradYear: document.getElementById('memberGradYear').value.trim(),
         pubs: document.getElementById('memberPubs').value.split('\n').map(s => s.trim()).filter(Boolean)
       };
 
@@ -1504,10 +1512,14 @@
       const member = data.labMembers.find(m => m.id === id);
       if (!member) return;
 
-      const placement = prompt(`"${member.name}" is graduating.\n\nPlease enter their placement (e.g., PhD Student at MIT, Samsung Electronics):`);
-      if (placement === null) return; // cancelled
+      const gradYear = prompt(`"${member.name}" is graduating.\n\nGraduation year (e.g., 2025):`, new Date().getFullYear());
+      if (gradYear === null) return;
+
+      const placement = prompt(`Please enter their placement (e.g., PhD Student at MIT, Samsung Electronics):`);
+      if (placement === null) return;
 
       member.status = 'alumni';
+      member.gradYear = gradYear.trim();
       member.placement = placement.trim();
       renderMembers();
       saveData();
