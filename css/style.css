@@ -241,12 +241,13 @@ img {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 60px;
 }
 
 .hero-text {
   flex: 1;
+  text-align: center;
 }
 
 .hero-emblem {
@@ -297,6 +298,7 @@ img {
 .hero-links {
   display: flex;
   gap: 16px;
+  justify-content: center;
 }
 
 .hero-btn {
