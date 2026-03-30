@@ -253,10 +253,44 @@ const server = http.createServer(async (req, res) => {
 
   if (req.url === '/api/build' && req.method === 'POST') {
     try {
+      // Clear require cache so build.js picks up changes
+      delete require.cache[require.resolve('./build.js')];
       const { build } = require('./build.js');
       build();
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true, message: 'Build completed successfully' }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  if (req.url === '/api/deploy' && req.method === 'POST') {
+    try {
+      // Build first
+      delete require.cache[require.resolve('./build.js')];
+      const { build } = require('./build.js');
+      build();
+
+      // Git add, commit, push
+      const gitCommands = [
+        'git add -A',
+        'git commit -m "Update site content" --allow-empty',
+        'git push origin main'
+      ];
+      let output = '';
+      for (const cmd of gitCommands) {
+        try {
+          output += execSync(cmd, { cwd: ROOT_DIR, timeout: 30000 }).toString() + '\n';
+        } catch (cmdErr) {
+          // git commit may fail if nothing to commit - that's ok
+          if (!cmd.includes('commit')) throw cmdErr;
+          output += 'Nothing new to commit.\n';
+        }
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, message: 'Deployed successfully', output }));
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: err.message }));

@@ -306,8 +306,12 @@ function build() {
   const data = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
   let html = fs.readFileSync(INDEX_PATH, 'utf8');
 
-  const publications = data.publications || [];
-  const labMembers = data.labMembers || [];
+  // Filter hidden items from all sections
+  const publications = (data.publications || []).filter(p => !p.hidden);
+  const labMembers = (data.labMembers || []).filter(m => !m.hidden);
+  const research = (data.research || []).filter(r => !r.hidden);
+  const teaching = (data.teaching || []).filter(t => !t.hidden);
+  const news = (data.news || []).filter(n => !n.hidden);
 
   // Generate and replace publications
   const sortedPubs = sortPublications(publications);
@@ -327,15 +331,15 @@ function build() {
   html = replaceSection(html, '<!-- DATA:CV:START -->', '<!-- DATA:CV:END -->', cvHtml, '      ');
 
   // Generate and replace Research
-  const researchHtml = generateResearchHtml(data.research);
+  const researchHtml = generateResearchHtml(research);
   html = replaceSection(html, '<!-- DATA:RESEARCH:START -->', '<!-- DATA:RESEARCH:END -->', researchHtml, '        ');
 
   // Generate and replace Teaching
-  const teachingHtml = generateTeachingHtml(data.teaching);
+  const teachingHtml = generateTeachingHtml(teaching);
   html = replaceSection(html, '<!-- DATA:TEACHING:START -->', '<!-- DATA:TEACHING:END -->', teachingHtml, '        ');
 
   // Generate and replace News
-  const newsHtml = generateNewsHtml(data.news);
+  const newsHtml = generateNewsHtml(news);
   html = replaceSection(html, '<!-- DATA:NEWS:START -->', '<!-- DATA:NEWS:END -->', newsHtml, '        ');
 
   // Generate and replace Contact

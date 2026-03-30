@@ -743,6 +743,12 @@
       table { font-size: 12px; }
       thead th, tbody td { padding: 8px 10px; }
     }
+
+    /* Hidden item styles */
+    .item-hidden { opacity: 0.4; }
+    .btn-hide { background: #f0f0f0; color: var(--text-secondary); border: 1px solid var(--border); font-size: 11px; padding: 3px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+    .btn-hide:hover { background: #e0e0e0; }
+    .btn-hide.is-hidden { background: #fff3cd; color: #856404; border-color: #ffc107; }
   </style>
 </head>
 <body>
@@ -773,6 +779,7 @@
           <button class="tab-btn" data-tab="contact">Contact</button>
         </div>
         <button class="btn btn-preview" id="previewToggle" onclick="togglePreview()">&#x1F441; Preview</button>
+        <button class="btn" style="background:var(--crimson);color:#fff;font-weight:600;" onclick="deployToGithub()">&#x1F680; Deploy</button>
       </div>
     </div>
   </header>
@@ -1233,6 +1240,12 @@
     function renderAll() {
       renderPublications();
       renderMembers();
+      renderAbout();
+      renderResearch();
+      renderTeaching();
+      renderNews();
+      renderCv();
+      renderContact();
     }
 
     function getFilteredPubs() {
@@ -1282,7 +1295,7 @@
       empty.style.display = 'none';
 
       tbody.innerHTML = pubs.map(p => `
-        <tr>
+        <tr class="${p.hidden ? 'item-hidden' : ''}">
           <td style="font-weight:600;white-space:nowrap;">${esc(p.year)}</td>
           <td class="pub-title" title="${esc(p.title)}">${esc(p.title)}</td>
           <td class="pub-authors" title="${esc(p.authors)}">${esc(p.authors)}</td>
@@ -1291,6 +1304,7 @@
           <td>
             <div class="actions-cell">
               <button class="btn btn-sm btn-icon" onclick="editPub(${p.id})" title="Edit">&#9998;</button>
+              <button class="btn-hide ${p.hidden ? 'is-hidden' : ''}" onclick="toggleHidden('publications', ${p.id})" title="${p.hidden ? 'Show' : 'Hide'}">${p.hidden ? 'Show' : 'Hide'}</button>
               <button class="btn btn-sm btn-icon btn-danger" onclick="deletePub(${p.id})" title="Delete">&#10005;</button>
             </div>
           </td>
@@ -1331,7 +1345,7 @@
         : '';
 
       return `
-        <div class="member-card">
+        <div class="member-card ${m.hidden ? 'item-hidden' : ''}">
           <div class="member-header">
             <div>
               <span class="member-name">${esc(m.name)}</span>
@@ -1343,6 +1357,7 @@
           ${pubsList}
           <div class="member-actions">
             <button class="btn btn-sm" onclick="editMember(${m.id})">Edit</button>
+            <button class="btn-hide ${m.hidden ? 'is-hidden' : ''}" onclick="toggleHidden('labMembers', ${m.id})">${m.hidden ? 'Show' : 'Hide'}</button>
             ${graduateBtn}
             <button class="btn btn-sm btn-danger" onclick="deleteMember(${m.id})">Delete</button>
           </div>
@@ -1701,7 +1716,7 @@
     function renderResearch() {
       if (!data.research) data.research = [];
       document.getElementById('researchItems').innerHTML = data.research.map((r, i) => `
-        <div class="cv-admin-section">
+        <div class="cv-admin-section ${r.hidden ? 'item-hidden' : ''}">
           <div class="cv-item-row">
             <div class="cv-field cv-field-sm">
               <label>Icon</label>
@@ -1715,6 +1730,7 @@
               <label>Title</label>
               <input value="${esc(r.title)}" onchange="updateResearchField(${i}, 'title', this.value)">
             </div>
+            <button class="btn-hide ${r.hidden ? 'is-hidden' : ''}" onclick="toggleHiddenByIndex('research', ${i})" style="align-self:flex-end;">${r.hidden ? 'Show' : 'Hide'}</button>
             <button class="btn btn-sm btn-danger" onclick="deleteResearch(${i})" style="align-self:flex-end;">&#10005;</button>
           </div>
           <div style="padding:8px 0;">
@@ -1753,7 +1769,7 @@
     function teachingCard(t) {
       const i = data.teaching.findIndex(x => x.id === t.id);
       return `
-        <div class="cv-admin-section" style="margin-bottom:12px;">
+        <div class="cv-admin-section ${t.hidden ? 'item-hidden' : ''}" style="margin-bottom:12px;">
           <div class="cv-item-row">
             <div class="cv-field cv-field-sm">
               <label>Level</label>
@@ -1766,6 +1782,7 @@
               <label>Course Name</label>
               <input value="${esc(t.title)}" onchange="updateTeachingField(${i}, 'title', this.value)">
             </div>
+            <button class="btn-hide ${t.hidden ? 'is-hidden' : ''}" onclick="toggleHiddenByIndex('teaching', ${i})" style="align-self:flex-end;">${t.hidden ? 'Show' : 'Hide'}</button>
             <button class="btn btn-sm btn-danger" onclick="deleteTeaching(${i})" style="align-self:flex-end;">&#10005;</button>
           </div>
           <div style="padding:4px 0;">
@@ -1793,7 +1810,7 @@
       if (!data.news) data.news = [];
       document.getElementById('newsItems').innerHTML = data.news.length
         ? data.news.map(n => `
-          <div class="cv-admin-section" style="margin-bottom:12px;">
+          <div class="cv-admin-section ${n.hidden ? 'item-hidden' : ''}" style="margin-bottom:12px;">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
               <div>
                 <span style="font-weight:600;color:var(--crimson);font-size:13px;">${esc(n.date)}</span>
@@ -1803,6 +1820,7 @@
               </div>
               <div class="actions-cell" style="flex-shrink:0;margin-left:12px;">
                 <button class="btn btn-sm btn-icon" onclick="editNews(${n.id})" title="Edit">&#9998;</button>
+                <button class="btn-hide ${n.hidden ? 'is-hidden' : ''}" onclick="toggleHidden('news', ${n.id})">${n.hidden ? 'Show' : 'Hide'}</button>
                 <button class="btn btn-sm btn-icon btn-danger" onclick="deleteNews(${n.id})" title="Delete">&#10005;</button>
               </div>
             </div>
@@ -1870,9 +1888,47 @@
       saveData();
     }
 
+    // ==================== Deploy ====================
+    async function deployToGithub() {
+      if (!confirm('Deploy changes to www.gunwoonglee.com?\n\nThis will build the site and push to GitHub.')) return;
+      showLoading(true);
+      try {
+        const res = await fetch('/api/deploy', { method: 'POST' });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Deploy failed');
+        toast('Deployed successfully! Changes will appear on the site in ~1 minute.', 'success');
+      } catch (e) {
+        toast('Deploy failed: ' + e.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // ==================== Hide/Show Toggle ====================
+    function toggleHidden(section, id) {
+      const arr = data[section];
+      if (!arr) return;
+      const item = arr.find(x => x.id === id);
+      if (!item) return;
+      item.hidden = !item.hidden;
+      renderAll();
+      saveData();
+    }
+
+    function toggleHiddenByIndex(section, index) {
+      const arr = data[section];
+      if (!arr || !arr[index] && typeof arr[index] !== 'object') return;
+      // For array items that are objects
+      if (typeof arr[index] === 'object') {
+        arr[index].hidden = !arr[index].hidden;
+      }
+      renderAll();
+      saveData();
+    }
+
     // ==================== Preview ====================
     let previewOpen = false;
-    const PREVIEW_URL = 'http://localhost:8080';
+    const PREVIEW_URL = '/index.html';
 
     function togglePreview() {
       previewOpen = !previewOpen;
