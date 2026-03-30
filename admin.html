@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel | Gunwoong Lee Homepage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --crimson: #9e1b34;
+      --crimson-light: #c4354f;
+      --crimson-dark: #7a1528;
+      --bg: #f7f7f8;
+      --surface: #ffffff;
+      --surface-hover: #fafafa;
+      --border: #e2e4e8;
+      --border-light: #eef0f3;
+      --text: #1a1d23;
+      --text-secondary: #5f6672;
+      --text-muted: #9098a5;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .header-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--crimson);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-title span {
+      font-weight: 400;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg);
+      padding: 4px;
+      border-radius: var(--radius);
+    }
+    .tab-btn {
+      padding: 8px 20px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { color: var(--text); background: var(--surface); }
+    .tab-btn.active {
+      background: var(--crimson);
+      color: #fff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Content Area */
+    .content {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .toolbar-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .btn:hover { border-color: #ccc; background: var(--surface-hover); }
+    .btn-primary {
+      background: var(--crimson);
+      color: #fff;
+      border-color: var(--crimson);
+    }
+    .btn-primary:hover {
+      background: var(--crimson-dark);
+      border-color: var(--crimson-dark);
+    }
+    .btn-danger {
+      color: #dc2626;
+      border-color: #fecaca;
+    }
+    .btn-danger:hover {
+      background: #fef2f2;
+      border-color: #f87171;
+    }
+    .btn-success {
+      color: #16a34a;
+      border-color: #bbf7d0;
+    }
+    .btn-success:hover {
+      background: #f0fdf4;
+      border-color: #4ade80;
+    }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    .btn-icon { padding: 6px 8px; }
+
+    .filter-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .filter-btn:hover { border-color: var(--crimson); color: var(--crimson); }
+    .filter-btn.active {
+      background: var(--crimson);
+      color: #fff;
+      border-color: var(--crimson);
+    }
+
+    /* Search */
+    .search-input {
+      padding: 8px 12px 8px 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px;
+      width: 260px;
+      font-family: inherit;
+      background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239098a5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 10px center no-repeat;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--crimson);
+      box-shadow: 0 0 0 3px rgba(158,27,52,0.08);
+    }
+
+    /* Table */
+    .table-wrapper {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      background: #f9fafb;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #fafbfc; }
+
+    .pub-title {
+      max-width: 360px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .pub-authors {
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-secondary);
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .badge-journal { background: #dbeafe; color: #1d4ed8; }
+    .badge-working { background: #fef3c7; color: #b45309; }
+    .badge-conference { background: #d1fae5; color: #059669; }
+    .badge-award { background: #fce7f3; color: #be185d; font-size: 11px; }
+
+    .actions-cell {
+      display: flex;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state p { margin-top: 8px; font-size: 14px; }
+
+    /* Cards (Lab Members) */
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title .count {
+      background: var(--crimson);
+      color: #fff;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .members-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .member-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s;
+    }
+    .member-card:hover { box-shadow: var(--shadow-md); }
+    .member-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .member-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .member-degree {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      background: #f3f4f6;
+      color: var(--text-secondary);
+      margin-left: 8px;
+    }
+    .member-topic {
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin-bottom: 12px;
+      font-style: italic;
+    }
+    .member-placement {
+      color: var(--crimson);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+    .member-pubs {
+      margin-top: 8px;
+    }
+    .member-pubs-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .member-pubs ul {
+      list-style: none;
+      padding: 0;
+    }
+    .member-pubs li {
+      font-size: 12px;
+      color: var(--text-secondary);
+      padding: 3px 0 3px 14px;
+      position: relative;
+      line-height: 1.4;
+    }
+    .member-pubs li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--crimson);
+      opacity: 0.5;
+    }
+    .member-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    /* About Section */
+    .about-paragraph-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .about-paragraph-card textarea {
+      width: 100%;
+      min-height: 100px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: vertical;
+      color: var(--text);
+      background: var(--bg);
+    }
+    .about-paragraph-card textarea:focus {
+      outline: none;
+      border-color: var(--crimson);
+      box-shadow: 0 0 0 3px rgba(158,27,52,0.1);
+    }
+    .about-paragraph-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .about-paragraph-num {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    /* CV Admin Sections */
+    .cv-admin-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .cv-admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .cv-admin-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .cv-item-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .cv-item-row:last-child { border-bottom: none; }
+    .cv-item-row .cv-field { flex: 1; }
+    .cv-item-row input {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--text);
+    }
+    .cv-item-row input:focus {
+      outline: none;
+      border-color: var(--crimson);
+    }
+    .cv-item-row .cv-field-sm { flex: 0 0 120px; }
+    .cv-item-row label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+      display: block;
+    }
+    .cv-list-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .cv-list-item:last-child { border-bottom: none; }
+    .cv-list-item input {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--text);
+    }
+    .cv-list-item input:focus { outline: none; border-color: var(--crimson); }
+    .cv-current-badge {
+      font-size: 11px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 2px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 1000;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      overflow-y: auto;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 580px;
+      animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h2 {
+      font-size: 17px;
+      font-weight: 600;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 22px;
+      line-height: 1;
+      padding: 4px;
+      border-radius: 4px;
+    }
+    .modal-close:hover { color: var(--text); background: var(--bg); }
+    .modal-body { padding: 24px; }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--crimson);
+      box-shadow: 0 0 0 3px rgba(158,27,52,0.08);
+    }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      animation: toastIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 280px;
+    }
+    .toast-success { background: #065f46; color: #fff; }
+    .toast-error { background: #991b1b; color: #fff; }
+    .toast-info { background: #1e40af; color: #fff; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Loading */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.7);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+    }
+    .loading-overlay.active { display: flex; }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--crimson);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Preview Panel */
+    .btn-preview {
+      background: var(--crimson);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-preview:hover { background: var(--crimson-dark); }
+    .btn-preview.active { background: #2d6a4f; }
+
+    .preview-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 0;
+      height: 100vh;
+      background: #fff;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+      z-index: 200;
+      transition: width 0.3s ease;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .preview-panel.open { width: 50vw; }
+
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: #1a1d23;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .preview-toolbar .preview-title {
+      font-size: 13px;
+      font-weight: 600;
+      flex: 1;
+    }
+    .preview-toolbar button {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #fff;
+      padding: 5px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .preview-toolbar button:hover { background: rgba(255,255,255,0.25); }
+    .preview-toolbar .preview-device-btns { display: flex; gap: 4px; }
+    .preview-toolbar .preview-device-btns button.active { background: var(--crimson); }
+
+    .preview-iframe-wrapper {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      background: #e5e5e5;
+      overflow: hidden;
+      padding: 0;
+    }
+    .preview-iframe-wrapper iframe {
+      border: none;
+      background: #fff;
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    /* When preview is open, shrink main content */
+    body.preview-open .header,
+    body.preview-open .content {
+      margin-right: 50vw;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .content { padding: 16px; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .toolbar-left, .toolbar-right { flex-wrap: wrap; }
+      .search-input { width: 100%; }
+      .members-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .pub-title { max-width: 180px; }
+      .pub-authors { max-width: 140px; }
+      .header-inner { flex-wrap: wrap; height: auto; padding: 12px 0; gap: 8px; }
+      table { font-size: 12px; }
+      thead th, tbody td { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-title">
+        Admin Panel <span>| Gunwoong Lee Homepage</span>
+      </div>
+      <div class="header-actions">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="publications">Publications</button>
+          <button class="tab-btn" data-tab="members">Lab Members</button>
+          <button class="tab-btn" data-tab="about">About</button>
+          <button class="tab-btn" data-tab="research">Research</button>
+          <button class="tab-btn" data-tab="teaching">Teaching</button>
+          <button class="tab-btn" data-tab="news">News</button>
+          <button class="tab-btn" data-tab="cv">CV</button>
+          <button class="tab-btn" data-tab="contact">Contact</button>
+        </div>
+        <button class="btn btn-preview" id="previewToggle" onclick="togglePreview()">&#x1F441; Preview</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="content">
+
+    <!-- Publications Tab -->
+    <div class="tab-panel active" id="panel-publications">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="journal">Journal Articles</button>
+          <button class="filter-btn" data-filter="working">Working Papers</button>
+          <button class="filter-btn" data-filter="conference">Conference Papers</button>
+        </div>
+        <div class="toolbar-right">
+          <input type="text" class="search-input" id="pubSearch" placeholder="Search publications...">
+          <button class="btn btn-primary" onclick="openPubModal()">+ Add Publication</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Title</th>
+              <th>Authors</th>
+              <th>Type</th>
+              <th>Award</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="pubTableBody">
+          </tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="pubEmptyState" style="display:none;">
+        <p>No publications found.</p>
+      </div>
+    </div>
+
+    <!-- Lab Members Tab -->
+    <div class="tab-panel" id="panel-members">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="section-title" style="margin-bottom:0;">Lab Members</div>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-primary" onclick="openMemberModal()">+ Add Member</button>
+        </div>
+      </div>
+
+      <div class="section-title">Current Members <span class="count" id="currentCount">0</span></div>
+      <div class="members-grid" id="currentMembersGrid"></div>
+
+      <div class="section-title">Alumni <span class="count" id="alumniCount">0</span></div>
+      <div class="members-grid" id="alumniMembersGrid"></div>
+    </div>
+
+    <!-- About Tab -->
+    <div class="tab-panel" id="panel-about">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="section-title" style="margin-bottom:0;">About Section</div>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-primary" onclick="addAboutParagraph()">+ Add Paragraph</button>
+        </div>
+      </div>
+      <p style="color:var(--text-secondary);margin-bottom:16px;font-size:14px;">
+        Each paragraph appears in the About section. You can use basic HTML tags: &lt;strong&gt;, &lt;em&gt;, &lt;a href="..."&gt;
+      </p>
+      <div id="aboutParagraphs"></div>
+    </div>
+
+    <!-- CV Tab -->
+    <div class="tab-panel" id="panel-cv">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="section-title" style="margin-bottom:0;">Curriculum Vitae</div>
+        </div>
+        <div class="toolbar-right">
+          <label class="btn btn-primary" style="cursor:pointer;">
+            &#x1F4C4; Import from .docx
+            <input type="file" accept=".docx" style="display:none;" onchange="importCvFile(this)">
+          </label>
+        </div>
+      </div>
+
+      <!-- Education -->
+      <div class="cv-admin-section">
+        <div class="cv-admin-header">
+          <h3>Education</h3>
+          <button class="btn btn-sm btn-primary" onclick="addCvItem('education')">+ Add</button>
+        </div>
+        <div id="cvEducation"></div>
+      </div>
+
+      <!-- Academic Positions -->
+      <div class="cv-admin-section">
+        <div class="cv-admin-header">
+          <h3>Academic Positions</h3>
+          <button class="btn btn-sm btn-primary" onclick="addCvItem('positions')">+ Add</button>
+        </div>
+        <div id="cvPositions"></div>
+      </div>
+
+      <!-- Honors & Awards -->
+      <div class="cv-admin-section">
+        <div class="cv-admin-header">
+          <h3>Honors &amp; Awards</h3>
+          <button class="btn btn-sm btn-primary" onclick="addCvListItem('honors')">+ Add</button>
+        </div>
+        <div id="cvHonors"></div>
+      </div>
+
+      <!-- Academic Service -->
+      <div class="cv-admin-section">
+        <div class="cv-admin-header">
+          <h3>Academic Service</h3>
+          <button class="btn btn-sm btn-primary" onclick="addCvListItem('service')">+ Add</button>
+        </div>
+        <div id="cvService"></div>
+      </div>
+
+      <!-- Industry Consulting -->
+      <div class="cv-admin-section">
+        <div class="cv-admin-header">
+          <h3>Industry Consulting</h3>
+          <button class="btn btn-sm btn-primary" onclick="addCvListItem('consulting')">+ Add</button>
+        </div>
+        <div id="cvConsulting"></div>
+      </div>
+    </div>
+
+    <!-- Research Tab -->
+    <div class="tab-panel" id="panel-research">
+      <div class="toolbar">
+        <div class="toolbar-left"><div class="section-title" style="margin-bottom:0;">Research Areas</div></div>
+        <div class="toolbar-right">
+          <button class="btn btn-primary" onclick="addResearch()">+ Add Research Area</button>
+        </div>
+      </div>
+      <div id="researchItems"></div>
+    </div>
+
+    <!-- Teaching Tab -->
+    <div class="tab-panel" id="panel-teaching">
+      <div class="toolbar">
+        <div class="toolbar-left"><div class="section-title" style="margin-bottom:0;">Courses</div></div>
+        <div class="toolbar-right">
+          <button class="btn btn-primary" onclick="addTeaching()">+ Add Course</button>
+        </div>
+      </div>
+      <h3 style="margin:16px 0 8px;font-size:15px;color:var(--text-secondary);">Undergraduate</h3>
+      <div id="teachingUG"></div>
+      <h3 style="margin:20px 0 8px;font-size:15px;color:var(--text-secondary);">Graduate</h3>
+      <div id="teachingGrad"></div>
+    </div>
+
+    <!-- News Tab -->
+    <div class="tab-panel" id="panel-news">
+      <div class="toolbar">
+        <div class="toolbar-left"><div class="section-title" style="margin-bottom:0;">News &amp; Updates</div></div>
+        <div class="toolbar-right">
+          <button class="btn btn-primary" onclick="openNewsModal()">+ Add News</button>
+        </div>
+      </div>
+      <div id="newsItems"></div>
+    </div>
+
+    <!-- Contact Tab -->
+    <div class="tab-panel" id="panel-contact">
+      <div class="toolbar">
+        <div class="toolbar-left"><div class="section-title" style="margin-bottom:0;">Contact Information</div></div>
+      </div>
+      <div class="cv-admin-section">
+        <div class="form-group" style="margin-bottom:16px;">
+          <label style="font-weight:600;margin-bottom:4px;display:block;">Email</label>
+          <input type="text" id="contactEmail" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;" onchange="updateContact()">
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label style="font-weight:600;margin-bottom:4px;display:block;">Phone</label>
+          <input type="text" id="contactPhone" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;" onchange="updateContact()">
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label style="font-weight:600;margin-bottom:4px;display:block;">Office (use Enter for line break)</label>
+          <textarea id="contactOffice" rows="2" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;resize:vertical;" onchange="updateContact()"></textarea>
+        </div>
+        <div class="form-group">
+          <label style="font-weight:600;margin-bottom:4px;display:block;">Office Hours (use Enter for line break)</label>
+          <textarea id="contactHours" rows="2" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;resize:vertical;" onchange="updateContact()"></textarea>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- CV Import Preview Modal -->
+  <div class="modal-overlay" id="cvImportModalOverlay">
+    <div class="modal" style="max-width:900px;max-height:85vh;">
+      <div class="modal-header">
+        <h2 id="cvImportModalTitle">CV Import Preview</h2>
+        <button class="modal-close" onclick="closeCvImportModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="overflow-y:auto;max-height:60vh;">
+        <p style="color:var(--text-secondary);font-size:13px;margin-bottom:16px;">
+          Parsed sections from your CV file. Check the items you want to import, then click "Import Selected".
+        </p>
+        <div id="cvImportContent"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeCvImportModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="applyImport()">Import Selected</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Publication Modal -->
+  <div class="modal-overlay" id="pubModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="pubModalTitle">Add Publication</h2>
+        <button class="modal-close" onclick="closePubModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="pubId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type</label>
+            <select id="pubType">
+              <option value="journal">Journal Article</option>
+              <option value="working">Working Paper</option>
+              <option value="conference">Conference Paper</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Year</label>
+            <input type="text" id="pubYear" placeholder="e.g., 2025, R&R, Working">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="pubTitleInput" placeholder="Publication title">
+        </div>
+        <div class="form-group">
+          <label>Authors</label>
+          <input type="text" id="pubAuthors" placeholder="e.g., Kim, J. & Lee, G.">
+        </div>
+        <div class="form-group">
+          <label>Venue</label>
+          <input type="text" id="pubVenue" placeholder="e.g., MIS Quarterly, 49(1), 1-30.">
+        </div>
+        <div class="form-group">
+          <label>Award</label>
+          <input type="text" id="pubAward" placeholder="e.g., Best Paper (leave empty if none)">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closePubModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="savePub()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Member Modal -->
+  <div class="modal-overlay" id="memberModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="memberModalTitle">Add Member</h2>
+        <button class="modal-close" onclick="closeMemberModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="memberId">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="memberName" placeholder="Full name">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Degree</label>
+            <select id="memberDegree">
+              <option value="PhD">PhD</option>
+              <option value="MS">MS</option>
+              <option value="MSBA">MSBA</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="memberStatus">
+              <option value="current">Current</option>
+              <option value="alumni">Alumni</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Research Topic</label>
+          <input type="text" id="memberTopic" placeholder="e.g., Online Platforms & Digital Commerce">
+        </div>
+        <div class="form-group" id="placementGroup" style="display:none;">
+          <label>Placement</label>
+          <input type="text" id="memberPlacement" placeholder="e.g., Assistant Professor, Seoul National University">
+        </div>
+        <div class="form-group">
+          <label>Publications (one per line)</label>
+          <textarea id="memberPubs" rows="4" placeholder="Publication 1&#10;Publication 2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeMemberModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveMember()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- News Modal -->
+  <div class="modal-overlay" id="newsModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="newsModalTitle">Add News</h2>
+        <button class="modal-close" onclick="closeNewsModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="newsId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="text" id="newsDate" placeholder="e.g., 2025, Feb 2024">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="newsTitleInput" placeholder="News headline">
+        </div>
+        <div class="form-group">
+          <label>Content (HTML allowed: &lt;em&gt;, &lt;strong&gt;)</label>
+          <textarea id="newsContent" rows="3" placeholder="Description..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Link URL (optional)</label>
+            <input type="text" id="newsLink" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Link Label</label>
+            <input type="text" id="newsLinkLabel" placeholder="e.g., Article, KSA">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeNewsModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveNews()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview Panel -->
+  <div class="preview-panel" id="previewPanel">
+    <div class="preview-toolbar">
+      <span class="preview-title">Homepage Preview</span>
+      <div class="preview-device-btns">
+        <button class="active" onclick="setPreviewDevice('desktop', this)" title="Desktop">&#x1F5A5; Desktop</button>
+        <button onclick="setPreviewDevice('tablet', this)" title="Tablet">&#x1F4F1; Tablet</button>
+        <button onclick="setPreviewDevice('mobile', this)" title="Mobile">&#x1F4F1; Mobile</button>
+      </div>
+      <button onclick="refreshPreview()" title="Refresh">&#x21BB; Reload</button>
+      <button onclick="openPreviewExternal()" title="Open in new tab">&#x2197; New Tab</button>
+      <button onclick="togglePreview()" title="Close">&times; Close</button>
+    </div>
+    <div class="preview-iframe-wrapper">
+      <iframe id="previewFrame" style="width:100%;"></iframe>
+    </div>
+  </div>
+
+  <script>
+    // ==================== State ====================
+    let data = { publications: [], labMembers: [] };
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    // ==================== API ====================
+    async function loadData() {
+      showLoading(true);
+      try {
+        const res = await fetch('/api/data');
+        if (!res.ok) throw new Error('Failed to load data');
+        data = await res.json();
+        renderAll();
+        toast('Data loaded successfully', 'success');
+      } catch (e) {
+        toast('Failed to load data: ' + e.message, 'error');
+        console.error(e);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    async function saveData() {
+      showLoading(true);
+      try {
+        const res = await fetch('/api/data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Failed to save data');
+        toast('Data saved successfully', 'success');
+
+        // Trigger build
+        try {
+          const buildRes = await fetch('/api/build', { method: 'POST' });
+          if (buildRes.ok) {
+            toast('Homepage rebuilt successfully', 'success');
+            // Auto-refresh preview if open
+            if (previewOpen) {
+              setTimeout(refreshPreview, 300);
+            }
+          } else {
+            toast('Save succeeded, but build failed', 'error');
+          }
+        } catch (buildErr) {
+          toast('Save succeeded, but build failed: ' + buildErr.message, 'error');
+        }
+      } catch (e) {
+        toast('Failed to save: ' + e.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // ==================== Tabs ====================
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ==================== Filters ====================
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderPublications();
+      });
+    });
+
+    // Search
+    document.getElementById('pubSearch').addEventListener('input', e => {
+      searchQuery = e.target.value.toLowerCase();
+      renderPublications();
+    });
+
+    // ==================== Render ====================
+    function renderAll() {
+      renderPublications();
+      renderMembers();
+    }
+
+    function getFilteredPubs() {
+      let pubs = [...data.publications];
+
+      // Filter by type
+      if (currentFilter !== 'all') {
+        pubs = pubs.filter(p => p.type === currentFilter);
+      }
+
+      // Filter by search
+      if (searchQuery) {
+        pubs = pubs.filter(p =>
+          p.title.toLowerCase().includes(searchQuery) ||
+          p.authors.toLowerCase().includes(searchQuery) ||
+          p.venue.toLowerCase().includes(searchQuery) ||
+          p.year.toLowerCase().includes(searchQuery)
+        );
+      }
+
+      // Sort by year (newest first); non-numeric years like R&R/Working go to top
+      pubs.sort((a, b) => {
+        const ya = parseInt(a.year);
+        const yb = parseInt(b.year);
+        const aNum = isNaN(ya) ? 9999 : ya;
+        const bNum = isNaN(yb) ? 9999 : yb;
+        return bNum - aNum;
+      });
+
+      return pubs;
+    }
+
+    function renderPublications() {
+      const pubs = getFilteredPubs();
+      const tbody = document.getElementById('pubTableBody');
+      const empty = document.getElementById('pubEmptyState');
+      const tableWrapper = document.querySelector('#panel-publications .table-wrapper');
+
+      if (pubs.length === 0) {
+        tbody.innerHTML = '';
+        tableWrapper.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      tableWrapper.style.display = 'block';
+      empty.style.display = 'none';
+
+      tbody.innerHTML = pubs.map(p => `
+        <tr>
+          <td style="font-weight:600;white-space:nowrap;">${esc(p.year)}</td>
+          <td class="pub-title" title="${esc(p.title)}">${esc(p.title)}</td>
+          <td class="pub-authors" title="${esc(p.authors)}">${esc(p.authors)}</td>
+          <td><span class="badge badge-${p.type}">${typeLabel(p.type)}</span></td>
+          <td>${p.award ? `<span class="badge badge-award">${esc(p.award)}</span>` : '<span style="color:var(--text-muted);">-</span>'}</td>
+          <td>
+            <div class="actions-cell">
+              <button class="btn btn-sm btn-icon" onclick="editPub(${p.id})" title="Edit">&#9998;</button>
+              <button class="btn btn-sm btn-icon btn-danger" onclick="deletePub(${p.id})" title="Delete">&#10005;</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderMembers() {
+      const current = data.labMembers.filter(m => m.status === 'current');
+      const alumni = data.labMembers.filter(m => m.status === 'alumni');
+
+      document.getElementById('currentCount').textContent = current.length;
+      document.getElementById('alumniCount').textContent = alumni.length;
+
+      document.getElementById('currentMembersGrid').innerHTML = current.length
+        ? current.map(m => memberCard(m, true)).join('')
+        : '<div class="empty-state"><p>No current members.</p></div>';
+
+      document.getElementById('alumniMembersGrid').innerHTML = alumni.length
+        ? alumni.map(m => memberCard(m, false)).join('')
+        : '<div class="empty-state"><p>No alumni.</p></div>';
+    }
+
+    function memberCard(m, isCurrent) {
+      const pubsList = m.pubs && m.pubs.length
+        ? `<div class="member-pubs">
+            <div class="member-pubs-label">Publications</div>
+            <ul>${m.pubs.map(p => `<li>${esc(p)}</li>`).join('')}</ul>
+           </div>`
+        : '';
+
+      const placementHtml = m.placement
+        ? `<div class="member-placement">${esc(m.placement)}</div>`
+        : '';
+
+      const graduateBtn = isCurrent
+        ? `<button class="btn btn-sm btn-success" onclick="graduateMember(${m.id})">Graduate</button>`
+        : '';
+
+      return `
+        <div class="member-card">
+          <div class="member-header">
+            <div>
+              <span class="member-name">${esc(m.name)}</span>
+              <span class="member-degree">${esc(m.degree)}</span>
+            </div>
+          </div>
+          ${m.topic ? `<div class="member-topic">${esc(m.topic)}</div>` : ''}
+          ${placementHtml}
+          ${pubsList}
+          <div class="member-actions">
+            <button class="btn btn-sm" onclick="editMember(${m.id})">Edit</button>
+            ${graduateBtn}
+            <button class="btn btn-sm btn-danger" onclick="deleteMember(${m.id})">Delete</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // ==================== Publication CRUD ====================
+    function openPubModal(pub) {
+      document.getElementById('pubModalTitle').textContent = pub ? 'Edit Publication' : 'Add Publication';
+      document.getElementById('pubId').value = pub ? pub.id : '';
+      document.getElementById('pubType').value = pub ? pub.type : 'journal';
+      document.getElementById('pubYear').value = pub ? pub.year : '';
+      document.getElementById('pubTitleInput').value = pub ? pub.title : '';
+      document.getElementById('pubAuthors').value = pub ? pub.authors : '';
+      document.getElementById('pubVenue').value = pub ? pub.venue : '';
+      document.getElementById('pubAward').value = pub ? pub.award : '';
+      document.getElementById('pubModalOverlay').classList.add('active');
+    }
+
+    function closePubModal() {
+      document.getElementById('pubModalOverlay').classList.remove('active');
+    }
+
+    function editPub(id) {
+      const pub = data.publications.find(p => p.id === id);
+      if (pub) openPubModal(pub);
+    }
+
+    function savePub() {
+      const id = document.getElementById('pubId').value;
+      const pubData = {
+        type: document.getElementById('pubType').value,
+        year: document.getElementById('pubYear').value.trim(),
+        title: document.getElementById('pubTitleInput').value.trim(),
+        authors: document.getElementById('pubAuthors').value.trim(),
+        venue: document.getElementById('pubVenue').value.trim(),
+        award: document.getElementById('pubAward').value.trim()
+      };
+
+      if (!pubData.title || !pubData.authors) {
+        toast('Title and Authors are required.', 'error');
+        return;
+      }
+
+      if (id) {
+        // Edit
+        const idx = data.publications.findIndex(p => p.id === parseInt(id));
+        if (idx !== -1) {
+          data.publications[idx] = { ...data.publications[idx], ...pubData };
+        }
+      } else {
+        // Add
+        const maxId = data.publications.reduce((max, p) => Math.max(max, p.id), 0);
+        data.publications.push({ id: maxId + 1, ...pubData });
+      }
+
+      closePubModal();
+      renderPublications();
+      saveData();
+    }
+
+    function deletePub(id) {
+      const pub = data.publications.find(p => p.id === id);
+      if (!pub) return;
+      if (!confirm(`Are you sure you want to delete this publication?\n\n"${pub.title}"`)) return;
+
+      data.publications = data.publications.filter(p => p.id !== id);
+      renderPublications();
+      saveData();
+    }
+
+    // ==================== Member CRUD ====================
+    function openMemberModal(member) {
+      document.getElementById('memberModalTitle').textContent = member ? 'Edit Member' : 'Add Member';
+      document.getElementById('memberId').value = member ? member.id : '';
+      document.getElementById('memberName').value = member ? member.name : '';
+      document.getElementById('memberDegree').value = member ? member.degree : 'PhD';
+      document.getElementById('memberStatus').value = member ? member.status : 'current';
+      document.getElementById('memberTopic').value = member ? member.topic : '';
+      document.getElementById('memberPlacement').value = member ? member.placement : '';
+      document.getElementById('memberPubs').value = member && member.pubs ? member.pubs.join('\n') : '';
+      togglePlacement();
+      document.getElementById('memberModalOverlay').classList.add('active');
+    }
+
+    function closeMemberModal() {
+      document.getElementById('memberModalOverlay').classList.remove('active');
+    }
+
+    document.getElementById('memberStatus').addEventListener('change', togglePlacement);
+    function togglePlacement() {
+      const status = document.getElementById('memberStatus').value;
+      document.getElementById('placementGroup').style.display = status === 'alumni' ? 'block' : 'none';
+    }
+
+    function editMember(id) {
+      const member = data.labMembers.find(m => m.id === id);
+      if (member) openMemberModal(member);
+    }
+
+    function saveMember() {
+      const id = document.getElementById('memberId').value;
+      const memberData = {
+        name: document.getElementById('memberName').value.trim(),
+        degree: document.getElementById('memberDegree').value,
+        status: document.getElementById('memberStatus').value,
+        topic: document.getElementById('memberTopic').value.trim(),
+        placement: document.getElementById('memberPlacement').value.trim(),
+        pubs: document.getElementById('memberPubs').value.split('\n').map(s => s.trim()).filter(Boolean)
+      };
+
+      if (!memberData.name) {
+        toast('Name is required.', 'error');
+        return;
+      }
+
+      if (id) {
+        const idx = data.labMembers.findIndex(m => m.id === parseInt(id));
+        if (idx !== -1) {
+          data.labMembers[idx] = { ...data.labMembers[idx], ...memberData };
+        }
+      } else {
+        const maxId = data.labMembers.reduce((max, m) => Math.max(max, m.id), 0);
+        data.labMembers.push({ id: maxId + 1, ...memberData });
+      }
+
+      closeMemberModal();
+      renderMembers();
+      saveData();
+    }
+
+    function deleteMember(id) {
+      const member = data.labMembers.find(m => m.id === id);
+      if (!member) return;
+      if (!confirm(`Are you sure you want to delete "${member.name}"?`)) return;
+
+      data.labMembers = data.labMembers.filter(m => m.id !== id);
+      renderMembers();
+      saveData();
+    }
+
+    function graduateMember(id) {
+      const member = data.labMembers.find(m => m.id === id);
+      if (!member) return;
+
+      const placement = prompt(`"${member.name}" is graduating.\n\nPlease enter their placement (e.g., PhD Student at MIT, Samsung Electronics):`);
+      if (placement === null) return; // cancelled
+
+      member.status = 'alumni';
+      member.placement = placement.trim();
+      renderMembers();
+      saveData();
+    }
+
+    // ==================== Helpers ====================
+    function typeLabel(type) {
+      const labels = { journal: 'Journal', working: 'Working', conference: 'Conference' };
+      return labels[type] || type;
+    }
+
+    function esc(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function showLoading(show) {
+      document.getElementById('loadingOverlay').classList.toggle('active', show);
+    }
+
+    function toast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      el.textContent = msg;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.transition = 'opacity 0.3s';
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+      }, 3000);
+    }
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', e => {
+        if (e.target === overlay) {
+          overlay.classList.remove('active');
+        }
+      });
+    });
+
+    // Close modals on Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(o => o.classList.remove('active'));
+      }
+    });
+
+    // ==================== About CRUD ====================
+    function renderAbout() {
+      const container = document.getElementById('aboutParagraphs');
+      if (!data.about || !data.about.paragraphs) {
+        data.about = { paragraphs: [] };
+      }
+      container.innerHTML = data.about.paragraphs.map((p, i) => `
+        <div class="about-paragraph-card">
+          <div class="about-paragraph-num">Paragraph ${i + 1}</div>
+          <textarea id="aboutP${i}" onchange="updateAboutParagraph(${i}, this.value)">${esc(p)}</textarea>
+          <div class="about-paragraph-actions">
+            ${i > 0 ? `<button class="btn btn-sm" onclick="moveAboutParagraph(${i}, -1)">&uarr; Up</button>` : ''}
+            ${i < data.about.paragraphs.length - 1 ? `<button class="btn btn-sm" onclick="moveAboutParagraph(${i}, 1)">&darr; Down</button>` : ''}
+            <button class="btn btn-sm btn-danger" onclick="deleteAboutParagraph(${i})">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addAboutParagraph() {
+      if (!data.about) data.about = { paragraphs: [] };
+      data.about.paragraphs.push('New paragraph...');
+      renderAbout();
+    }
+
+    function updateAboutParagraph(index, value) {
+      data.about.paragraphs[index] = value;
+      saveData();
+    }
+
+    function deleteAboutParagraph(index) {
+      if (!confirm('Delete this paragraph?')) return;
+      data.about.paragraphs.splice(index, 1);
+      renderAbout();
+      saveData();
+    }
+
+    function moveAboutParagraph(index, direction) {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= data.about.paragraphs.length) return;
+      const temp = data.about.paragraphs[index];
+      data.about.paragraphs[index] = data.about.paragraphs[newIndex];
+      data.about.paragraphs[newIndex] = temp;
+      renderAbout();
+      saveData();
+    }
+
+    // ==================== CV CRUD ====================
+    function renderCv() {
+      if (!data.cv) {
+        data.cv = { education: [], positions: [], honors: [], service: [], consulting: [] };
+      }
+      renderCvTimeline('cvEducation', data.cv.education || [], 'education');
+      renderCvPositions('cvPositions', data.cv.positions || []);
+      renderCvList('cvHonors', data.cv.honors || [], 'honors');
+      renderCvList('cvService', data.cv.service || [], 'service');
+      renderCvList('cvConsulting', data.cv.consulting || [], 'consulting');
+    }
+
+    function renderCvTimeline(containerId, items, section) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = items.map((item, i) => `
+        <div class="cv-item-row">
+          <div class="cv-field cv-field-sm">
+            <label>Year</label>
+            <input value="${esc(item.year)}" onchange="updateCvField('${section}', ${i}, 'year', this.value)">
+          </div>
+          <div class="cv-field">
+            <label>Degree / Title</label>
+            <input value="${esc(item.title)}" onchange="updateCvField('${section}', ${i}, 'title', this.value)">
+          </div>
+          <div class="cv-field">
+            <label>Institution</label>
+            <input value="${esc(item.institution)}" onchange="updateCvField('${section}', ${i}, 'institution', this.value)">
+          </div>
+          <button class="btn btn-sm btn-danger" onclick="deleteCvItem('${section}', ${i})" style="align-self:flex-end;">&#10005;</button>
+        </div>
+      `).join('');
+    }
+
+    function renderCvPositions(containerId, items) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = items.map((item, i) => `
+        <div class="cv-item-row">
+          <div class="cv-field cv-field-sm">
+            <label>Period</label>
+            <input value="${esc(item.date)}" onchange="updateCvField('positions', ${i}, 'date', this.value)" style="min-width:140px;">
+          </div>
+          <div class="cv-field">
+            <label>Title</label>
+            <input value="${esc(item.title)}" onchange="updateCvField('positions', ${i}, 'title', this.value)">
+          </div>
+          <div class="cv-field">
+            <label>Institution</label>
+            <input value="${esc(item.institution)}" onchange="updateCvField('positions', ${i}, 'institution', this.value)">
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;align-self:flex-end;">
+            <label style="font-size:11px;white-space:nowrap;"><input type="checkbox" ${item.current ? 'checked' : ''} onchange="updateCvField('positions', ${i}, 'current', this.checked)"> Current</label>
+            <button class="btn btn-sm btn-danger" onclick="deleteCvItem('positions', ${i})">&#10005;</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderCvList(containerId, items, section) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = items.map((item, i) => `
+        <div class="cv-list-item">
+          <input value="${esc(item)}" onchange="updateCvListValue('${section}', ${i}, this.value)">
+          <button class="btn btn-sm btn-danger" onclick="deleteCvListItem('${section}', ${i})">&#10005;</button>
+        </div>
+      `).join('');
+    }
+
+    function updateCvField(section, index, field, value) {
+      data.cv[section][index][field] = value;
+      saveData();
+    }
+
+    function updateCvListValue(section, index, value) {
+      data.cv[section][index] = value;
+      saveData();
+    }
+
+    function addCvItem(section) {
+      if (section === 'education') {
+        data.cv.education.push({ year: '', title: '', institution: '' });
+      } else if (section === 'positions') {
+        data.cv.positions.push({ date: '', title: '', institution: '', current: false });
+      }
+      renderCv();
+    }
+
+    function addCvListItem(section) {
+      if (!data.cv[section]) data.cv[section] = [];
+      data.cv[section].push('');
+      renderCv();
+    }
+
+    function deleteCvItem(section, index) {
+      if (!confirm('Delete this item?')) return;
+      data.cv[section].splice(index, 1);
+      renderCv();
+      saveData();
+    }
+
+    function deleteCvListItem(section, index) {
+      if (!confirm('Delete this item?')) return;
+      data.cv[section].splice(index, 1);
+      renderCv();
+      saveData();
+    }
+
+    // ==================== Research CRUD ====================
+    function renderResearch() {
+      if (!data.research) data.research = [];
+      document.getElementById('researchItems').innerHTML = data.research.map((r, i) => `
+        <div class="cv-admin-section">
+          <div class="cv-item-row">
+            <div class="cv-field cv-field-sm">
+              <label>Icon</label>
+              <select onchange="updateResearchField(${i}, 'icon', this.value)" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+                <option value="cube" ${r.icon==='cube'?'selected':''}>Cube</option>
+                <option value="globe" ${r.icon==='globe'?'selected':''}>Globe</option>
+                <option value="chart" ${r.icon==='chart'?'selected':''}>Chart</option>
+              </select>
+            </div>
+            <div class="cv-field">
+              <label>Title</label>
+              <input value="${esc(r.title)}" onchange="updateResearchField(${i}, 'title', this.value)">
+            </div>
+            <button class="btn btn-sm btn-danger" onclick="deleteResearch(${i})" style="align-self:flex-end;">&#10005;</button>
+          </div>
+          <div style="padding:8px 0;">
+            <label style="font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Description</label>
+            <textarea style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical;min-height:60px;" onchange="updateResearchField(${i}, 'description', this.value)">${esc(r.description)}</textarea>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateResearchField(i, field, value) { data.research[i][field] = value; saveData(); }
+    function addResearch() {
+      if (!data.research) data.research = [];
+      data.research.push({ id: Date.now(), title: '', description: '', icon: 'cube' });
+      renderResearch();
+    }
+    function deleteResearch(i) {
+      if (!confirm('Delete this research area?')) return;
+      data.research.splice(i, 1);
+      renderResearch();
+      saveData();
+    }
+
+    // ==================== Teaching CRUD ====================
+    function renderTeaching() {
+      if (!data.teaching) data.teaching = [];
+      const ug = data.teaching.filter(t => t.level === 'Undergraduate');
+      const grad = data.teaching.filter(t => t.level === 'Graduate');
+
+      document.getElementById('teachingUG').innerHTML = ug.length
+        ? ug.map(t => teachingCard(t)).join('') : '<p style="color:var(--text-muted);padding:8px 0;">No undergraduate courses.</p>';
+      document.getElementById('teachingGrad').innerHTML = grad.length
+        ? grad.map(t => teachingCard(t)).join('') : '<p style="color:var(--text-muted);padding:8px 0;">No graduate courses.</p>';
+    }
+
+    function teachingCard(t) {
+      const i = data.teaching.findIndex(x => x.id === t.id);
+      return `
+        <div class="cv-admin-section" style="margin-bottom:12px;">
+          <div class="cv-item-row">
+            <div class="cv-field cv-field-sm">
+              <label>Level</label>
+              <select onchange="updateTeachingField(${i}, 'level', this.value)" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+                <option value="Undergraduate" ${t.level==='Undergraduate'?'selected':''}>UG</option>
+                <option value="Graduate" ${t.level==='Graduate'?'selected':''}>Grad</option>
+              </select>
+            </div>
+            <div class="cv-field">
+              <label>Course Name</label>
+              <input value="${esc(t.title)}" onchange="updateTeachingField(${i}, 'title', this.value)">
+            </div>
+            <button class="btn btn-sm btn-danger" onclick="deleteTeaching(${i})" style="align-self:flex-end;">&#10005;</button>
+          </div>
+          <div style="padding:4px 0;">
+            <label style="font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;">Description</label>
+            <textarea style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical;min-height:50px;" onchange="updateTeachingField(${i}, 'description', this.value)">${esc(t.description)}</textarea>
+          </div>
+        </div>`;
+    }
+
+    function updateTeachingField(i, field, value) { data.teaching[i][field] = value; renderTeaching(); saveData(); }
+    function addTeaching() {
+      if (!data.teaching) data.teaching = [];
+      data.teaching.push({ id: Date.now(), level: 'Undergraduate', title: '', description: '' });
+      renderTeaching();
+    }
+    function deleteTeaching(i) {
+      if (!confirm('Delete this course?')) return;
+      data.teaching.splice(i, 1);
+      renderTeaching();
+      saveData();
+    }
+
+    // ==================== News CRUD ====================
+    function renderNews() {
+      if (!data.news) data.news = [];
+      document.getElementById('newsItems').innerHTML = data.news.length
+        ? data.news.map(n => `
+          <div class="cv-admin-section" style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <span style="font-weight:600;color:var(--crimson);font-size:13px;">${esc(n.date)}</span>
+                <h4 style="margin:4px 0;font-size:15px;">${esc(n.title)}</h4>
+                <p style="font-size:13px;color:var(--text-secondary);margin-top:4px;">${esc(n.content).substring(0, 120)}${n.content.length > 120 ? '...' : ''}</p>
+                ${n.link ? `<a href="${esc(n.link)}" target="_blank" style="font-size:12px;color:var(--crimson);">[${esc(n.linkLabel || 'Link')}]</a>` : ''}
+              </div>
+              <div class="actions-cell" style="flex-shrink:0;margin-left:12px;">
+                <button class="btn btn-sm btn-icon" onclick="editNews(${n.id})" title="Edit">&#9998;</button>
+                <button class="btn btn-sm btn-icon btn-danger" onclick="deleteNews(${n.id})" title="Delete">&#10005;</button>
+              </div>
+            </div>
+          </div>
+        `).join('')
+        : '<div class="empty-state"><p>No news items.</p></div>';
+    }
+
+    function openNewsModal(news) {
+      document.getElementById('newsModalTitle').textContent = news ? 'Edit News' : 'Add News';
+      document.getElementById('newsId').value = news ? news.id : '';
+      document.getElementById('newsDate').value = news ? news.date : '';
+      document.getElementById('newsTitleInput').value = news ? news.title : '';
+      document.getElementById('newsContent').value = news ? news.content : '';
+      document.getElementById('newsLink').value = news ? (news.link || '') : '';
+      document.getElementById('newsLinkLabel').value = news ? (news.linkLabel || '') : '';
+      document.getElementById('newsModalOverlay').classList.add('active');
+    }
+    function closeNewsModal() { document.getElementById('newsModalOverlay').classList.remove('active'); }
+    function editNews(id) { const n = data.news.find(x => x.id === id); if (n) openNewsModal(n); }
+    function saveNews() {
+      const id = document.getElementById('newsId').value;
+      const nd = {
+        date: document.getElementById('newsDate').value.trim(),
+        title: document.getElementById('newsTitleInput').value.trim(),
+        content: document.getElementById('newsContent').value.trim(),
+        link: document.getElementById('newsLink').value.trim(),
+        linkLabel: document.getElementById('newsLinkLabel').value.trim()
+      };
+      if (!nd.title) { toast('Title is required.', 'error'); return; }
+      if (id) {
+        const idx = data.news.findIndex(n => n.id === parseInt(id));
+        if (idx !== -1) data.news[idx] = { ...data.news[idx], ...nd };
+      } else {
+        const maxId = data.news.reduce((max, n) => Math.max(max, n.id), 0);
+        data.news.push({ id: maxId + 1, ...nd });
+      }
+      closeNewsModal();
+      renderNews();
+      saveData();
+    }
+    function deleteNews(id) {
+      const n = data.news.find(x => x.id === id);
+      if (!n || !confirm(`Delete "${n.title}"?`)) return;
+      data.news = data.news.filter(x => x.id !== id);
+      renderNews();
+      saveData();
+    }
+
+    // ==================== Contact ====================
+    function renderContact() {
+      if (!data.contact) data.contact = { email: '', phone: '', office: '', hours: '' };
+      document.getElementById('contactEmail').value = data.contact.email || '';
+      document.getElementById('contactPhone').value = data.contact.phone || '';
+      document.getElementById('contactOffice').value = data.contact.office || '';
+      document.getElementById('contactHours').value = data.contact.hours || '';
+    }
+    function updateContact() {
+      data.contact = {
+        email: document.getElementById('contactEmail').value.trim(),
+        phone: document.getElementById('contactPhone').value.trim(),
+        office: document.getElementById('contactOffice').value.trim(),
+        hours: document.getElementById('contactHours').value.trim()
+      };
+      saveData();
+    }
+
+    // ==================== Preview ====================
+    let previewOpen = false;
+    const PREVIEW_URL = 'http://localhost:8080';
+
+    function togglePreview() {
+      previewOpen = !previewOpen;
+      const panel = document.getElementById('previewPanel');
+      const btn = document.getElementById('previewToggle');
+      const frame = document.getElementById('previewFrame');
+
+      if (previewOpen) {
+        panel.classList.add('open');
+        btn.classList.add('active');
+        btn.innerHTML = '&#x2715; Close Preview';
+        document.body.classList.add('preview-open');
+        frame.src = PREVIEW_URL;
+      } else {
+        panel.classList.remove('open');
+        btn.classList.remove('active');
+        btn.innerHTML = '&#x1F441; Preview';
+        document.body.classList.remove('preview-open');
+        frame.src = '';
+      }
+    }
+
+    function refreshPreview() {
+      const frame = document.getElementById('previewFrame');
+      if (frame.src && frame.src !== 'about:blank') {
+        frame.src = PREVIEW_URL + '?t=' + Date.now();
+      }
+    }
+
+    function openPreviewExternal() {
+      window.open(PREVIEW_URL, '_blank');
+    }
+
+    function setPreviewDevice(device, btn) {
+      const frame = document.getElementById('previewFrame');
+      const widths = { desktop: '100%', tablet: '768px', mobile: '375px' };
+      frame.style.width = widths[device] || '100%';
+
+      // Toggle active button
+      document.querySelectorAll('.preview-device-btns button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // ==================== CV Import ====================
+    let importData = null;
+
+    async function importCvFile(input) {
+      const file = input.files[0];
+      if (!file) return;
+      input.value = ''; // reset so same file can be re-selected
+
+      if (!file.name.endsWith('.docx')) {
+        toast('Please select a .docx file', 'error');
+        return;
+      }
+
+      showLoading(true);
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/parse-cv', { method: 'POST', body: formData });
+        const result = await res.json();
+
+        if (!res.ok) throw new Error(result.error || 'Parse failed');
+
+        importData = result;
+        renderImportPreview(result);
+        document.getElementById('cvImportModalOverlay').classList.add('active');
+        toast(`Parsed "${result.filename}" — ${result.paragraphs.length} paragraphs found`, 'success');
+      } catch (e) {
+        toast('Failed to parse CV: ' + e.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function renderImportPreview(result) {
+      const p = result.parsed;
+      const sections = [
+        { key: 'education', label: 'Education', items: p.education },
+        { key: 'positions', label: 'Academic Positions', items: p.positions },
+        { key: 'honors', label: 'Honors & Awards', items: p.honors },
+        { key: 'service', label: 'Professional Service', items: p.service },
+        { key: 'consulting', label: 'Consulting', items: p.consulting },
+        { key: 'publications', label: 'Publications', items: p.publications },
+        { key: 'labMembers', label: 'Lab Members / Students', items: p.labMembers },
+      ];
+
+      let html = '';
+      for (const sec of sections) {
+        if (!sec.items || sec.items.length === 0) continue;
+        html += `<div class="cv-admin-section" style="margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <label style="font-size:13px;font-weight:600;">
+              <input type="checkbox" class="import-section-toggle" data-section="${sec.key}" checked onchange="toggleImportSection('${sec.key}', this.checked)">
+              ${sec.label} <span class="count">${sec.items.length}</span>
+            </label>
+          </div>
+          <div id="import-${sec.key}" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:8px;">
+            ${sec.items.map((item, i) => `
+              <div style="display:flex;align-items:flex-start;gap:6px;padding:4px 0;border-bottom:1px solid var(--border-light);font-size:13px;">
+                <input type="checkbox" class="import-item" data-section="${sec.key}" data-index="${i}" checked>
+                <span style="flex:1;word-break:break-word;">${esc(item)}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>`;
+      }
+
+      if (!html) {
+        html = `<div class="empty-state"><p>No recognizable sections found in the CV. The file content is shown below for reference.</p></div>
+        <div style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:12px;font-size:13px;line-height:1.6;">
+          ${result.paragraphs.map(p => `<p style="margin-bottom:6px;">${esc(p)}</p>`).join('')}
+        </div>`;
+      }
+
+      document.getElementById('cvImportContent').innerHTML = html;
+    }
+
+    function toggleImportSection(section, checked) {
+      document.querySelectorAll(`.import-item[data-section="${section}"]`).forEach(cb => {
+        cb.checked = checked;
+      });
+    }
+
+    function closeCvImportModal() {
+      document.getElementById('cvImportModalOverlay').classList.remove('active');
+      importData = null;
+    }
+
+    function applyImport() {
+      if (!importData) return;
+      const p = importData.parsed;
+      let importCount = 0;
+
+      // Helper: get checked items for a section
+      function getChecked(section) {
+        const items = [];
+        document.querySelectorAll(`.import-item[data-section="${section}"]:checked`).forEach(cb => {
+          const idx = parseInt(cb.dataset.index);
+          items.push(p[section][idx]);
+        });
+        return items;
+      }
+
+      // Import Education
+      const eduItems = getChecked('education');
+      for (const line of eduItems) {
+        // Try to parse: "Year — Degree, Institution" or similar patterns
+        const yearMatch = line.match(/^(\d{4})\s*[-–—]?\s*/);
+        const year = yearMatch ? yearMatch[1] : '';
+        const rest = yearMatch ? line.slice(yearMatch[0].length) : line;
+        const parts = rest.split(/,\s*/);
+        if (!data.cv) data.cv = { education: [], positions: [], honors: [], service: [], consulting: [] };
+        if (!data.cv.education) data.cv.education = [];
+        data.cv.education.push({
+          year: year,
+          title: parts[0] || rest,
+          institution: parts.slice(1).join(', ') || ''
+        });
+        importCount++;
+      }
+
+      // Import Positions
+      const posItems = getChecked('positions');
+      for (const line of posItems) {
+        const dateMatch = line.match(/^([\d]{4}\s*[-–—]\s*(?:[\d]{4}|present|current))\s*[,:]?\s*/i);
+        const date = dateMatch ? dateMatch[1] : '';
+        const rest = dateMatch ? line.slice(dateMatch[0].length) : line;
+        const parts = rest.split(/,\s*/);
+        if (!data.cv.positions) data.cv.positions = [];
+        data.cv.positions.push({
+          date: date,
+          title: parts[0] || rest,
+          institution: parts.slice(1).join(', ') || '',
+          current: /present|current/i.test(date)
+        });
+        importCount++;
+      }
+
+      // Import Honors
+      const honorItems = getChecked('honors');
+      if (honorItems.length > 0) {
+        if (!data.cv.honors) data.cv.honors = [];
+        data.cv.honors.push(...honorItems);
+        importCount += honorItems.length;
+      }
+
+      // Import Service
+      const serviceItems = getChecked('service');
+      if (serviceItems.length > 0) {
+        if (!data.cv.service) data.cv.service = [];
+        data.cv.service.push(...serviceItems);
+        importCount += serviceItems.length;
+      }
+
+      // Import Consulting
+      const consultItems = getChecked('consulting');
+      if (consultItems.length > 0) {
+        if (!data.cv.consulting) data.cv.consulting = [];
+        data.cv.consulting.push(...consultItems);
+        importCount += consultItems.length;
+      }
+
+      // Import Publications
+      const pubItems = getChecked('publications');
+      for (const line of pubItems) {
+        // Try to detect type and parse
+        const maxId = data.publications.reduce((max, p) => Math.max(max, p.id), 0);
+        const yearMatch = line.match(/\((\d{4})\)/);
+        const year = yearMatch ? yearMatch[1] : '';
+
+        // Detect type
+        let type = 'journal';
+        if (/working\s*paper|under\s*review|r&r|revise/i.test(line)) type = 'working';
+        if (/conference|proceedings|icis|amcis|workshop|wits|cist/i.test(line)) type = 'conference';
+
+        // Try to split authors and title
+        // Common pattern: "Authors (Year) Title, Venue"
+        let authors = '', title = line, venue = '';
+        const authorTitleMatch = line.match(/^(.+?)\s*\(\d{4}\)\s*[.,]?\s*[""]?(.+?)[""]?[.,]\s*(.+)$/);
+        if (authorTitleMatch) {
+          authors = authorTitleMatch[1].trim();
+          title = authorTitleMatch[2].trim();
+          venue = authorTitleMatch[3].trim();
+        }
+
+        data.publications.push({
+          id: maxId + 1 + importCount,
+          type,
+          year: year || 'TBD',
+          title,
+          authors,
+          venue,
+          award: ''
+        });
+        importCount++;
+      }
+
+      closeCvImportModal();
+
+      if (importCount > 0) {
+        renderAll();
+        saveData();
+        toast(`Imported ${importCount} items successfully`, 'success');
+      } else {
+        toast('No items were selected for import', 'error');
+      }
+    }
+
+    // ==================== Updated Render ====================
+    renderAll = function() {
+      renderPublications();
+      renderMembers();
+      renderAbout();
+      renderCv();
+      renderResearch();
+      renderTeaching();
+      renderNews();
+      renderContact();
+    };
+
+    // ==================== Init ====================
+    loadData();
+  </script>
+</body>
+</html>
