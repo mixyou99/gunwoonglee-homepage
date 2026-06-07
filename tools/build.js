@@ -36,6 +36,13 @@ function typeSortKey(type) {
 }
 
 function sortPublications(pubs) {
+  // 관리자(admin.html)에서 수동으로 지정한 순서(order)가 모두 있으면 그 순서를 그대로 사용
+  const allHaveOrder = pubs.length > 0 && pubs.every(p => typeof p.order === 'number');
+  if (allHaveOrder) {
+    return pubs.slice().sort((a, b) => a.order - b.order);
+  }
+
+  // order가 없으면 기존 기본 정렬(종류 → 연도 내림차순)로 폴백
   return pubs.slice().sort((a, b) => {
     // First sort by type: journal, working, conference
     const typeDiff = typeSortKey(a.type) - typeSortKey(b.type);

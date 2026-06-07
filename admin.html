@@ -271,6 +271,14 @@
       white-space: nowrap;
     }
 
+    .order-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .order-cell .btn-icon { padding: 2px 6px; line-height: 1; font-size: 11px; }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
     .empty-state {
       text-align: center;
       padding: 60px 20px;
@@ -805,6 +813,7 @@
         <table>
           <thead>
             <tr>
+              <th>Order</th>
               <th>Year</th>
               <th>Title</th>
               <th>Authors</th>
@@ -1171,6 +1180,7 @@
         const res = await fetch('/api/data');
         if (!res.ok) throw new Error('Failed to load data');
         data = await res.json();
+        ensurePubOrder();
         renderAll();
         toast('Data loaded successfully', 'success');
       } catch (e) {
@@ -1252,6 +1262,44 @@
       renderContact();
     }
 
+    // ----- 수동 정렬 지원 (publication order) -----
+    // 공개 사이트(build.js)와 동일한 "기본" 정렬 키 — 최초 마이그레이션 시에만 사용
+    function legacyTypeSortKey(type) {
+      if (type === 'journal') return 0;
+      if (type === 'working') return 1;
+      if (type === 'conference') return 2;
+      return 3;
+    }
+    function legacyYearSortValue(year) {
+      const num = parseInt(year, 10);
+      if (!isNaN(num)) return num;
+      if (year === 'R&R') return 3;
+      if (year === 'Under Review') return 2;
+      if (year === 'Working') return 1;
+      return 0;
+    }
+    function legacyYearIsNonNumeric(year) {
+      return isNaN(parseInt(year, 10)) ? 0 : 1; // 비숫자 연도가 위로
+    }
+    function legacyPubCompare(a, b) {
+      const typeDiff = legacyTypeSortKey(a.type) - legacyTypeSortKey(b.type);
+      if (typeDiff !== 0) return typeDiff;
+      const aN = legacyYearIsNonNumeric(a.year);
+      const bN = legacyYearIsNonNumeric(b.year);
+      if (aN !== bN) return aN - bN;
+      return legacyYearSortValue(b.year) - legacyYearSortValue(a.year);
+    }
+
+    // 모든 논문에 order 값이 없으면, 현재 공개 사이트 순서대로 order를 한 번 부여한다.
+    function ensurePubOrder() {
+      if (!data.publications) data.publications = [];
+      const allHaveOrder = data.publications.length > 0 &&
+        data.publications.every(p => typeof p.order === 'number');
+      if (allHaveOrder) return;
+      const ordered = [...data.publications].sort(legacyPubCompare);
+      ordered.forEach((p, i) => { p.order = i; });
+    }
+
     function getFilteredPubs() {
       let pubs = [...data.publications];
 
@@ -1270,14 +1318,8 @@
         );
       }
 
-      // Sort by year (newest first); non-numeric years like R&R/Working go to top
-      pubs.sort((a, b) => {
-        const ya = parseInt(a.year);
-        const yb = parseInt(b.year);
-        const aNum = isNaN(ya) ? 9999 : ya;
-        const bNum = isNaN(yb) ? 9999 : yb;
-        return bNum - aNum;
-      });
+      // 수동으로 지정한 순서(order)대로 정렬
+      pubs.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
       return pubs;
     }
@@ -1298,8 +1340,14 @@
       tableWrapper.style.display = 'block';
       empty.style.display = 'none';
 
-      tbody.innerHTML = pubs.map(p => `
+      tbody.innerHTML = pubs.map((p, i) => `
         <tr class="${p.hidden ? 'item-hidden' : ''}">
+          <td>
+            <div class="order-cell">
+              <button class="btn btn-sm btn-icon" onclick="movePub(${p.id}, -1)" title="Move up" ${i === 0 ? 'disabled' : ''}>&#9650;</button>
+              <button class="btn btn-sm btn-icon" onclick="movePub(${p.id}, 1)" title="Move down" ${i === pubs.length - 1 ? 'disabled' : ''}>&#9660;</button>
+            </div>
+          </td>
           <td style="font-weight:600;white-space:nowrap;">${esc(p.year)}</td>
           <td class="pub-title" title="${esc(p.title)}">${esc(p.title)}</td>
           <td class="pub-authors" title="${esc(p.authors)}">${esc(p.authors)}</td>
@@ -1314,6 +1362,26 @@
           </td>
         </tr>
       `).join('');
+    }
+
+    // 현재 화면에 보이는 목록 기준으로, 위/아래 이웃 논문과 order 값을 맞바꿔 순서를 변경
+    function movePub(id, direction) {
+      const visible = getFilteredPubs();
+      const idx = visible.findIndex(p => p.id === id);
+      if (idx === -1) return;
+      const neighborIdx = idx + direction;
+      if (neighborIdx < 0 || neighborIdx >= visible.length) return;
+
+      const a = data.publications.find(p => p.id === visible[idx].id);
+      const b = data.publications.find(p => p.id === visible[neighborIdx].id);
+      if (!a || !b) return;
+
+      const tmp = a.order;
+      a.order = b.order;
+      b.order = tmp;
+
+      renderPublications();
+      saveData();
     }
 
     function renderMembers() {
@@ -1414,9 +1482,10 @@
           data.publications[idx] = { ...data.publications[idx], ...pubData };
         }
       } else {
-        // Add
+        // Add — 새 논문은 맨 위에 오도록 가장 작은 order 부여
         const maxId = data.publications.reduce((max, p) => Math.max(max, p.id), 0);
-        data.publications.push({ id: maxId + 1, ...pubData });
+        const minOrder = data.publications.reduce((min, p) => Math.min(min, p.order ?? 0), 0);
+        data.publications.push({ id: maxId + 1, order: minOrder - 1, ...pubData });
       }
 
       closePubModal();
@@ -2194,8 +2263,10 @@
           venue = authorTitleMatch[3].trim();
         }
 
+        const minOrder = data.publications.reduce((min, p) => Math.min(min, p.order ?? 0), 0);
         data.publications.push({
           id: maxId + 1 + importCount,
+          order: minOrder - 1 - importCount,
           type,
           year: year || 'TBD',
           title,
