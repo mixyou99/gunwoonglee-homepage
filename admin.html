@@ -262,6 +262,7 @@
     }
     .badge-journal { background: #dbeafe; color: #1d4ed8; }
     .badge-working { background: #fef3c7; color: #b45309; }
+    .badge-progress { background: #ede9fe; color: #6d28d9; }
     .badge-conference { background: #d1fae5; color: #059669; }
     .badge-award { background: #fce7f3; color: #be185d; font-size: 11px; }
 
@@ -801,7 +802,8 @@
         <div class="toolbar-left">
           <button class="filter-btn active" data-filter="all">All</button>
           <button class="filter-btn" data-filter="journal">Journal Articles</button>
-          <button class="filter-btn" data-filter="working">Working Papers</button>
+          <button class="filter-btn" data-filter="working">Journal Working Papers</button>
+          <button class="filter-btn" data-filter="progress">Research-in-Progress</button>
           <button class="filter-btn" data-filter="conference">Conference Papers</button>
         </div>
         <div class="toolbar-right">
@@ -1021,7 +1023,8 @@
             <label>Type</label>
             <select id="pubType">
               <option value="journal">Journal Article</option>
-              <option value="working">Working Paper</option>
+              <option value="working">Journal Working Paper</option>
+              <option value="progress">Research-in-Progress</option>
               <option value="conference">Conference Paper</option>
             </select>
           </div>
@@ -1267,8 +1270,9 @@
     function legacyTypeSortKey(type) {
       if (type === 'journal') return 0;
       if (type === 'working') return 1;
-      if (type === 'conference') return 2;
-      return 3;
+      if (type === 'progress') return 2;
+      if (type === 'conference') return 3;
+      return 4;
     }
     function legacyYearSortValue(year) {
       const num = parseInt(year, 10);
@@ -1596,7 +1600,7 @@
 
     // ==================== Helpers ====================
     function typeLabel(type) {
-      const labels = { journal: 'Journal', working: 'Working', conference: 'Conference' };
+      const labels = { journal: 'Journal', working: 'Journal Working', progress: 'Research-in-Progress', conference: 'Conference' };
       return labels[type] || type;
     }
 
@@ -2251,6 +2255,7 @@
         // Detect type
         let type = 'journal';
         if (/working\s*paper|under\s*review|r&r|revise/i.test(line)) type = 'working';
+        if (/research[\s-]*in[\s-]*progress|work[\s-]*in[\s-]*progress|ongoing|in\s*preparation|data\s*collection/i.test(line)) type = 'progress';
         if (/conference|proceedings|icis|amcis|workshop|wits|cist/i.test(line)) type = 'conference';
 
         // Try to split authors and title

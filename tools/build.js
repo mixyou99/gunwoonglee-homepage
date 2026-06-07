@@ -31,8 +31,9 @@ function yearSortValue(year) {
 function typeSortKey(type) {
   if (type === 'journal') return 0;
   if (type === 'working') return 1;
-  if (type === 'conference') return 2;
-  return 3;
+  if (type === 'progress') return 2;
+  if (type === 'conference') return 3;
+  return 4;
 }
 
 function sortPublications(pubs) {
