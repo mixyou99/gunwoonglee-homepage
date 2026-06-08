@@ -802,7 +802,7 @@
         <div class="toolbar-left">
           <button class="filter-btn active" data-filter="all">All</button>
           <button class="filter-btn" data-filter="journal">Journal Articles</button>
-          <button class="filter-btn" data-filter="working">Journal Working Papers</button>
+          <button class="filter-btn" data-filter="working">Working Journal Papers</button>
           <button class="filter-btn" data-filter="progress">Research-in-Progress</button>
           <button class="filter-btn" data-filter="conference">Conference Papers</button>
         </div>
@@ -1023,7 +1023,7 @@
             <label>Type</label>
             <select id="pubType">
               <option value="journal">Journal Article</option>
-              <option value="working">Journal Working Paper</option>
+              <option value="working">Working Journal Paper</option>
               <option value="progress">Research-in-Progress</option>
               <option value="conference">Conference Paper</option>
             </select>
@@ -1600,7 +1600,7 @@
 
     // ==================== Helpers ====================
     function typeLabel(type) {
-      const labels = { journal: 'Journal', working: 'Journal Working', progress: 'Research-in-Progress', conference: 'Conference' };
+      const labels = { journal: 'Journal', working: 'Working Journal', progress: 'Research-in-Progress', conference: 'Conference' };
       return labels[type] || type;
     }
 
