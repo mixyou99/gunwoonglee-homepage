@@ -158,3 +158,82 @@ To https://github.com/mixyou99/gunwoonglee-homepage.git
    4dbce0f..517bb4d  main -> main
 [2026-06-08T02:40:18.940Z] POST /api/deploy
 Built index.html: 59 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+To https://github.com/mixyou99/gunwoonglee-homepage.git
+   517bb4d..09f4801  main -> main
+[2026-06-08T02:52:50.719Z] POST /api/data
+[2026-06-08T02:52:50.724Z] POST /api/build
+Built index.html: 60 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:53:25.184Z] POST /api/data
+[2026-06-08T02:53:25.191Z] POST /api/build
+Built index.html: 61 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:53:44.509Z] POST /api/data
+[2026-06-08T02:53:44.516Z] POST /api/build
+Built index.html: 61 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:53:46.146Z] POST /api/data
+[2026-06-08T02:53:46.167Z] POST /api/build
+Built index.html: 61 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:53:47.604Z] POST /api/data
+[2026-06-08T02:53:47.618Z] POST /api/build
+Built index.html: 61 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:53:48.212Z] POST /api/data
+[2026-06-08T02:53:48.231Z] POST /api/build
+Built index.html: 61 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:53:50.162Z] POST /api/data
+[2026-06-08T02:53:50.174Z] POST /api/build
+Built index.html: 61 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:53:51.079Z] POST /api/data
+[2026-06-08T02:53:51.098Z] POST /api/build
+Built index.html: 61 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:53:52.046Z] POST /api/data
+[2026-06-08T02:53:52.065Z] POST /api/build
+Built index.html: 61 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:54:00.796Z] POST /api/data
+[2026-06-08T02:54:00.815Z] POST /api/build
+Built index.html: 61 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:54:02.355Z] POST /api/data
+[2026-06-08T02:54:02.371Z] POST /api/build
+Built index.html: 61 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:54:03.662Z] POST /api/data
+[2026-06-08T02:54:03.682Z] POST /api/build
+Built index.html: 61 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:54:06.978Z] POST /api/data
+[2026-06-08T02:54:06.996Z] POST /api/build
+Built index.html: 61 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:54:47.126Z] POST /api/data
+[2026-06-08T02:54:47.132Z] POST /api/build
+Built index.html: 62 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:54:54.710Z] POST /api/data
+[2026-06-08T02:54:54.719Z] POST /api/build
+Built index.html: 62 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:54:56.905Z] POST /api/data
+[2026-06-08T02:54:56.926Z] POST /api/build
+Built index.html: 62 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:54:58.663Z] POST /api/data
+[2026-06-08T02:54:58.682Z] POST /api/build
+Built index.html: 62 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:54:59.664Z] POST /api/data
+[2026-06-08T02:54:59.681Z] POST /api/build
+Built index.html: 62 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:55:00.863Z] POST /api/data
+[2026-06-08T02:55:00.879Z] POST /api/build
+Built index.html: 62 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:55:41.585Z] POST /api/data
+[2026-06-08T02:55:41.592Z] POST /api/build
+Built index.html: 63 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:55:45.471Z] POST /api/data
+[2026-06-08T02:55:45.487Z] POST /api/build
+Built index.html: 63 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:55:46.846Z] POST /api/data
+[2026-06-08T02:55:46.864Z] POST /api/build
+Built index.html: 63 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:55:47.705Z] POST /api/data
+[2026-06-08T02:55:47.723Z] POST /api/build
+Built index.html: 63 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:55:48.747Z] POST /api/data
+[2026-06-08T02:55:48.763Z] POST /api/build
+Built index.html: 63 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:56:36.993Z] POST /api/data
+[2026-06-08T02:56:36.999Z] POST /api/build
+Built index.html: 63 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+[2026-06-08T02:57:11.182Z] POST /api/deploy
+Built index.html: 63 publications, 18 lab members, 3 about paragraphs, 5 cv sections
