@@ -268,3 +268,14 @@ Built index.html: 63 publications, 18 lab members, 3 about paragraphs, 5 cv sect
 Built index.html: 63 publications, 18 lab members, 3 about paragraphs, 5 cv sections
 [2026-06-18T09:14:02.624Z] POST /api/deploy
 Built index.html: 63 publications, 18 lab members, 3 about paragraphs, 5 cv sections
+To https://github.com/mixyou99/gunwoonglee-homepage.git
+   665f8b0..e8b5d24  main -> main
+Admin panel: http://localhost:3000/admin.html
+Admin panel: http://localhost:3000/admin.html
+Admin panel: http://localhost:3000/admin.html
+Admin panel: http://localhost:3000/admin.html
+[2026-06-27T10:36:11.664Z] GET /admin.html
+[2026-06-27T10:36:11.850Z] GET /api/data
+[2026-06-27T10:36:12.042Z] GET /favicon.ico
+Admin panel: http://localhost:3000/admin.html
+Admin panel: http://localhost:3000/admin.html
