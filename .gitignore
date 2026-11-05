@@ -4,3 +4,6 @@ node_modules/
 *.swo
 *~
 .claude/
+
+# 관리자 서버 로그 (커밋하지 않음)
+*.log
