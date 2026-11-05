@@ -31,9 +31,10 @@ function yearSortValue(year) {
 function typeSortKey(type) {
   if (type === 'journal') return 0;
   if (type === 'working') return 1;
-  if (type === 'progress') return 2;
-  if (type === 'conference') return 3;
-  return 4;
+  if (type === 'wp') return 2;
+  if (type === 'progress') return 3;
+  if (type === 'conference') return 4;
+  return 5;
 }
 
 function sortPublications(pubs) {
@@ -60,7 +61,23 @@ function sortPublications(pubs) {
   });
 }
 
-function generatePublicationHtml(pub) {
+// 공개 사이트 Publications 구성 — CV와 같은 순서·이름의 묶음
+const PUB_GROUPS = [
+  { type: 'journal', title: 'Published', note: 'Journal Articles', showYear: true },
+  { type: 'working', title: 'Journal Working Papers', note: 'Revise & Resubmit (R&R) / Under Review', showYear: true },
+  { type: 'wp', title: 'Working Papers', note: 'Complete manuscripts available at SSRN · target journals noted', showYear: false },
+  { type: 'progress', title: 'Work-in-Progress', note: '', showYear: false },
+  { type: 'conference', title: 'Conferences', note: 'Selected conference proceedings & presentations', showYear: false }
+];
+// CV처럼 2015년 이전 학회 발표는 한 묶음("~2015")으로 보여준다
+const CONF_EARLY_CUTOFF = 2015;
+const CONF_EARLY_LABEL = '~2015';
+
+function sortWithinGroup(pubs) {
+  return sortPublications(pubs);
+}
+
+function generatePublicationHtml(pub, showYear) {
   const year = escapeHtml(pub.year || '');
   const title = escapeHtml(pub.title || '');
   const authors = escapeHtml(pub.authors || '');
@@ -68,21 +85,81 @@ function generatePublicationHtml(pub) {
   const award = pub.award || '';
   const venue = pub.venue || '';
 
-  const awardSpan = award
-    ? ` <span style="color:var(--accent);font-size:0.8rem;">(${escapeHtml(award)})</span>`
-    : '';
+  const awardSpan = award ? ` <span class="pub-award">${escapeHtml(award)}</span>` : '';
+  const venueP = venue ? `\n    <p class="pub-venue"><em>${escapeHtml(venue)}</em></p>` : '';
+  const yearDiv = showYear ? `\n  <div class="pub-year">${year}</div>` : '';
 
-  const venueP = venue
-    ? `\n            <p class="pub-venue"><em>${escapeHtml(venue)}</em></p>`
-    : '';
+  return `<div class="pub-item${showYear ? '' : ' no-year'}" data-type="${type}">${yearDiv}
+  <div class="pub-details">
+    <h3>${title}${awardSpan}</h3>
+    <p class="pub-authors">${authors}</p>${venueP}
+  </div>
+</div>`;
+}
 
-  return `        <div class="pub-item fade-in" data-type="${type}">
-          <div class="pub-year">${year}</div>
-          <div class="pub-details">
-            <h3>${title}${awardSpan}</h3>
-            <p class="pub-authors">${authors}</p>${venueP}
-          </div>
-        </div>`;
+function indentBlock(text, spaces) {
+  const pad = ' '.repeat(spaces);
+  return text.split('\n').map(line => (line ? pad + line : line)).join('\n');
+}
+
+function confYearKey(year) {
+  const num = parseInt(year, 10);
+  if (isNaN(num)) return String(year || 'Other');
+  return num <= CONF_EARLY_CUTOFF ? CONF_EARLY_LABEL : String(num);
+}
+
+function generateConferenceBody(pubs) {
+  const byYear = new Map();
+  for (const p of sortWithinGroup(pubs)) {
+    const key = confYearKey(p.year);
+    if (!byYear.has(key)) byYear.set(key, []);
+    byYear.get(key).push(p);
+  }
+  const rank = k => (k === CONF_EARLY_LABEL ? CONF_EARLY_CUTOFF : (parseInt(k, 10) || -1));
+  const keys = [...byYear.keys()].sort((a, b) => rank(b) - rank(a));
+
+  const buttons = keys.map((k, i) =>
+    `  <button class="pub-year-btn${i === 0 ? ' active' : ''}" data-year="${escapeHtml(k)}" role="tab" aria-selected="${i === 0}">${escapeHtml(k)}<span class="pub-year-count">${byYear.get(k).length}</span></button>`
+  ).join('\n');
+
+  const panels = keys.map((k, i) => {
+    const items = byYear.get(k).map(p => generatePublicationHtml(p, k === CONF_EARLY_LABEL)).join('\n');
+    return `<div class="pub-year-panel" data-year="${escapeHtml(k)}" role="tabpanel"${i === 0 ? '' : ' hidden'}>
+${indentBlock(items, 2)}
+</div>`;
+  }).join('\n');
+
+  return `<div class="pub-years" role="tablist" aria-label="Conference year">
+${buttons}
+</div>
+${panels}`;
+}
+
+function generatePublicationsHtml(publications) {
+  const known = new Set(PUB_GROUPS.map(g => g.type));
+  const groups = PUB_GROUPS.slice();
+  // 알 수 없는 종류가 생겨도 사라지지 않도록 맨 뒤에 따로 보여준다
+  for (const t of new Set(publications.map(p => p.type))) {
+    if (!known.has(t)) groups.push({ type: t, title: t || 'Other', note: '', showYear: true });
+  }
+
+  return groups.map(g => {
+    const pubs = publications.filter(p => p.type === g.type);
+    if (pubs.length === 0) return '';
+    const note = g.note ? `\n    <span class="pub-group-note">${escapeHtml(g.note)}</span>` : '';
+    const body = g.type === 'conference'
+      ? generateConferenceBody(pubs)
+      : `<div class="pub-group-items">
+${indentBlock(sortWithinGroup(pubs).map(p => generatePublicationHtml(p, g.showYear)).join('\n'), 2)}
+</div>`;
+    return `<div class="pub-group" data-group="${g.type}">
+  <div class="pub-group-head fade-in">
+    <h3 class="pub-group-title">${escapeHtml(g.title)}</h3>${note}
+    <span class="pub-group-count">${pubs.length}</span>
+  </div>
+${indentBlock(body, 2)}
+</div>`;
+  }).filter(Boolean).join('\n');
 }
 
 function generateLabHtml(members) {
@@ -324,8 +401,7 @@ function build() {
   const news = (data.news || []).filter(n => !n.hidden);
 
   // Generate and replace publications
-  const sortedPubs = sortPublications(publications);
-  const pubHtml = sortedPubs.map(generatePublicationHtml).join('\n');
+  const pubHtml = indentBlock(generatePublicationsHtml(publications), 8);
   html = replaceSection(html, '<!-- DATA:PUBLICATIONS:START -->', '<!-- DATA:PUBLICATIONS:END -->', pubHtml, '        ');
 
   // Generate and replace lab members

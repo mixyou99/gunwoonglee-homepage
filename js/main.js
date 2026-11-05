@@ -98,32 +98,39 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===========================
-// Publication Filters
+// Publications: CV-style groups + conference year sub-menu
 // ===========================
 const pubFilters = document.querySelectorAll('.pub-filter');
-const pubItems = document.querySelectorAll('.pub-item');
+const pubGroups = document.querySelectorAll('.pub-group');
 
 pubFilters.forEach(filter => {
   filter.addEventListener('click', () => {
-    const filterValue = filter.dataset.filter;
+    const value = filter.dataset.filter;
+    pubFilters.forEach(f => {
+      const on = f === filter;
+      f.classList.toggle('active', on);
+      f.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    pubGroups.forEach(group => {
+      group.hidden = !(value === 'all' || group.dataset.group === value);
+    });
+  });
+});
 
-    pubFilters.forEach(f => f.classList.remove('active'));
-    filter.classList.add('active');
-
-    pubItems.forEach(item => {
-      if (filterValue === 'all' || item.dataset.type === filterValue) {
-        item.style.display = 'flex';
-        setTimeout(() => {
-          item.style.opacity = '1';
-          item.style.transform = 'translateY(0)';
-        }, 50);
-      } else {
-        item.style.opacity = '0';
-        item.style.transform = 'translateY(10px)';
-        setTimeout(() => {
-          item.style.display = 'none';
-        }, 300);
-      }
+document.querySelectorAll('.pub-group').forEach(group => {
+  const yearButtons = group.querySelectorAll('.pub-year-btn');
+  const yearPanels = group.querySelectorAll('.pub-year-panel');
+  yearButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const year = btn.dataset.year;
+      yearButtons.forEach(b => {
+        const on = b === btn;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      yearPanels.forEach(panel => {
+        panel.hidden = panel.dataset.year !== year;
+      });
     });
   });
 });
