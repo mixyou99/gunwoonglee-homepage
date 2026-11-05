@@ -136,6 +136,26 @@ document.querySelectorAll('.pub-group').forEach(group => {
 });
 
 // ===========================
+// Media: type filter (All / Newspaper Article / Video / Op-Ed)
+// ===========================
+const mediaFilters = document.querySelectorAll('.media-filter');
+const mediaItems = document.querySelectorAll('.media-item');
+
+mediaFilters.forEach(filter => {
+  filter.addEventListener('click', () => {
+    const value = filter.dataset.filter;
+    mediaFilters.forEach(f => {
+      const on = f === filter;
+      f.classList.toggle('active', on);
+      f.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    mediaItems.forEach(item => {
+      item.hidden = !(value === 'all' || item.dataset.type === value);
+    });
+  });
+});
+
+// ===========================
 // Smooth scroll offset for fixed nav
 // ===========================
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {

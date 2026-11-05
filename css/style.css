@@ -1004,6 +1004,140 @@ img {
 }
 
 /* ===========================
+   Media
+   =========================== */
+.media-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 48px;
+}
+
+.media-filter {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: all var(--transition);
+}
+
+.media-filter:hover,
+.media-filter.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.media-filter:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.media-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.media-item {
+  display: flex;
+  gap: 32px;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.media-item:first-child {
+  border-top: 1px solid var(--border);
+}
+
+.media-type-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border-radius: 4px;
+  padding: 2px 8px;
+  height: fit-content;
+  white-space: nowrap;
+}
+
+.media-date {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  min-width: 90px;
+  padding-top: 2px;
+}
+
+.media-content h3 {
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.media-outlet {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.media-content p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.media-content a {
+  color: var(--accent-light);
+  text-decoration: none;
+}
+
+.media-content a:hover,
+.media-content a:focus-visible {
+  text-decoration: underline;
+}
+
+.media-empty,
+.story-empty {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* ===========================
+   Story
+   =========================== */
+.story-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.story-item {
+  margin: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+.story-item img {
+  display: block;
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.story-item figcaption {
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* ===========================
    CV / Timeline
    =========================== */
 .cv-section {
@@ -1275,7 +1409,8 @@ img {
     gap: 8px;
   }
 
-  .news-item {
+  .news-item,
+  .media-item {
     flex-direction: column;
     gap: 8px;
   }
@@ -1294,13 +1429,20 @@ img {
     font-size: 1rem;
   }
 
-  .pub-filters {
+  .pub-filters,
+  .media-filters {
     gap: 8px;
   }
 
-  .pub-filter {
+  .pub-filter,
+  .media-filter {
     padding: 7px 14px;
     font-size: 0.8rem;
+  }
+
+  .story-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
   }
 
   .pub-group-title {

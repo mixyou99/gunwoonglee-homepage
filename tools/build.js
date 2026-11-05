@@ -304,11 +304,10 @@ function generateCvHtml(cv) {
   if (!cv) return '';
   const sections = [];
 
-  // Education
+  // Education (dates intentionally omitted per site policy)
   if (cv.education && cv.education.length > 0) {
-    const items = cv.education.map(e => `          <div class="timeline-item">
+    const items = cv.education.map(e => `          <div class="timeline-item no-date">
             <div class="timeline-dot"></div>
-            <div class="timeline-date">${escapeHtml(e.year)}</div>
             <div class="timeline-content">
               <h4>${escapeHtml(e.title)}</h4>
               <p>${escapeHtml(e.institution)}</p>
@@ -414,6 +413,55 @@ function generateNewsHtml(items) {
   }).join('\n');
 }
 
+const MEDIA_TYPE_LABELS = {
+  'article': 'Newspaper Article',
+  'video': 'Video',
+  'op-ed': 'Op-Ed'
+};
+
+function generateMediaHtml(items) {
+  if (!items || items.length === 0) {
+    return { html: '<p class="media-empty">No media items yet.</p>', filters: [] };
+  }
+  const typesPresent = [];
+  items.forEach(m => { if (!typesPresent.includes(m.type)) typesPresent.push(m.type); });
+
+  const cards = items.map(m => {
+    const linkHtml = m.link
+      ? ` <a href="${escapeHtml(m.link)}" target="_blank" rel="noopener">${escapeHtml(m.linkLabel || 'Link')}<span class="pub-link-icon" aria-hidden="true">&#8599;</span></a>`
+      : '';
+    const outlet = m.outlet ? `<span class="media-outlet">${escapeHtml(m.outlet)}</span>` : '';
+    return `        <div class="media-item fade-in" data-type="${escapeHtml(m.type)}">
+          <div class="media-type-badge">${escapeHtml(MEDIA_TYPE_LABELS[m.type] || m.type)}</div>
+          <div class="media-date">${escapeHtml(m.date)}</div>
+          <div class="media-content">
+            <h3>${escapeHtml(m.title)}</h3>
+            ${outlet}
+            <p>${m.content || ''}${linkHtml}</p>
+          </div>
+        </div>`;
+  }).join('\n');
+
+  return { html: cards, filters: typesPresent };
+}
+
+function generateMediaFilterHtml(filters) {
+  if (!filters || filters.length === 0) return '';
+  const buttons = ['        <button type="button" class="media-filter active" data-filter="all" aria-pressed="true">All</button>']
+    .concat(filters.map(t => `        <button type="button" class="media-filter" data-filter="${escapeHtml(t)}" aria-pressed="false">${escapeHtml(MEDIA_TYPE_LABELS[t] || t)}</button>`));
+  return buttons.join('\n');
+}
+
+function generateStoryHtml(items) {
+  if (!items || items.length === 0) {
+    return '<p class="story-empty">Photos coming soon.</p>';
+  }
+  return items.map(s => `        <figure class="story-item fade-in">
+          <img src="${escapeHtml(s.image)}" alt="${escapeHtml(s.caption || '')}" loading="lazy">
+          ${s.caption ? `<figcaption>${escapeHtml(s.caption)}</figcaption>` : ''}
+        </figure>`).join('\n');
+}
+
 function generateContactHtml(contact) {
   if (!contact) return '';
   const officeParts = (contact.office || '').split('\n');
@@ -466,6 +514,8 @@ function build() {
   const research = (data.research || []).filter(r => !r.hidden);
   const teaching = (data.teaching || []).filter(t => !t.hidden);
   const news = (data.news || []).filter(n => !n.hidden);
+  const media = (data.media || []).filter(m => !m.hidden);
+  const story = (data.story || []).filter(s => !s.hidden);
 
   // Generate and replace publications
   const pubHtml = indentBlock(generatePublicationsHtml(publications), 8);
@@ -498,6 +548,15 @@ function build() {
   // Generate and replace News
   const newsHtml = generateNewsHtml(news);
   html = replaceSection(html, '<!-- DATA:NEWS:START -->', '<!-- DATA:NEWS:END -->', newsHtml, '        ');
+
+  // Generate and replace Media
+  const mediaResult = generateMediaHtml(media);
+  html = replaceSection(html, '<!-- DATA:MEDIA:START -->', '<!-- DATA:MEDIA:END -->', mediaResult.html, '        ');
+  html = replaceSection(html, '<!-- DATA:MEDIA_FILTERS:START -->', '<!-- DATA:MEDIA_FILTERS:END -->', generateMediaFilterHtml(mediaResult.filters), '        ');
+
+  // Generate and replace Story
+  const storyHtml = generateStoryHtml(story);
+  html = replaceSection(html, '<!-- DATA:STORY:START -->', '<!-- DATA:STORY:END -->', storyHtml, '        ');
 
   // Generate and replace Contact
   const contactHtml = generateContactHtml(data.contact);
