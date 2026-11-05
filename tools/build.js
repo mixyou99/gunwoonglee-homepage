@@ -279,7 +279,14 @@ function generateLabHtml(members, publications) {
   ];
 
   for (const group of degreeGroups) {
-    const groupAlumni = alumni.filter(a => a.degree === group.degree);
+    const groupAlumni = alumni.filter(a => a.degree === group.degree).slice().sort((a, b) => {
+      const ya = parseInt(a.gradYear, 10);
+      const yb = parseInt(b.gradYear, 10);
+      const aNum = !isNaN(ya), bNum = !isNaN(yb);
+      if (aNum && bNum) return ya - yb;
+      if (aNum !== bNum) return aNum ? -1 : 1; // unknown year sorts last
+      return 0;
+    });
     if (groupAlumni.length === 0) continue;
 
     const alumniItems = groupAlumni.map(a => {
