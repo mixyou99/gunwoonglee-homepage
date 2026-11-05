@@ -63,7 +63,7 @@ function sortPublications(pubs) {
 
 // 공개 사이트 Publications 구성 — CV와 같은 순서·이름의 묶음
 const PUB_GROUPS = [
-  { type: 'journal', title: 'Published', note: 'Journal Articles', showYear: true },
+  { type: 'journal', title: 'Published', note: 'Journal Articles', showYear: true, showCount: false },
   { type: 'working', title: 'Journal Working Papers', note: 'Revise & Resubmit (R&R) / Under Review', showYear: true },
   { type: 'wp', title: 'Working Papers', note: 'Complete manuscripts available at SSRN · target journals noted', showYear: false },
   { type: 'progress', title: 'Work-in-Progress', note: '', showYear: false },
@@ -151,6 +151,7 @@ function generatePublicationsHtml(publications) {
     const pubs = publications.filter(p => p.type === g.type);
     if (pubs.length === 0) return '';
     const note = g.note ? `\n    <span class="pub-group-note">${escapeHtml(g.note)}</span>` : '';
+    const countSpan = g.showCount === false ? '' : `\n    <span class="pub-group-count">${pubs.length}</span>`;
     const body = g.type === 'conference'
       ? generateConferenceBody(pubs)
       : `<div class="pub-group-items">
@@ -158,8 +159,7 @@ ${indentBlock(sortWithinGroup(pubs).map(p => generatePublicationHtml(p, g.showYe
 </div>`;
     return `<div class="pub-group" data-group="${g.type}">
   <div class="pub-group-head fade-in">
-    <h3 class="pub-group-title">${escapeHtml(g.title)}</h3>${note}
-    <span class="pub-group-count">${pubs.length}</span>
+    <h3 class="pub-group-title">${escapeHtml(g.title)}</h3>${note}${countSpan}
   </div>
 ${indentBlock(body, 2)}
 </div>`;
@@ -240,7 +240,8 @@ function generateLabHtml(members, publications) {
   const current = members.filter(m => m.status === 'current');
   const alumni = members.filter(m => m.status === 'alumni');
 
-  const cards = [];
+  const currentCards = [];
+  const alumniCards = [];
 
   // Current members
   for (const member of current) {
@@ -264,7 +265,7 @@ function generateLabHtml(members, publications) {
       ? `<button type="button" class="member-name-btn" data-member="${member.id}">${name}<span class="member-pub-badge">${memberPubIndex[member.id].length}</span></button>`
       : name;
 
-    cards.push(`          <div class="member-card fade-in">
+    currentCards.push(`          <div class="member-card fade-in">
             <div class="member-avatar">${degree}</div>
             <h4>${nameHtml}</h4>${topicP}${pubsUl}
           </div>`);
@@ -272,9 +273,9 @@ function generateLabHtml(members, publications) {
 
   // Alumni cards grouped by degree
   const degreeGroups = [
-    { degree: 'PhD', label: 'PhD Alumni' },
-    { degree: 'MS', label: 'MS Alumni' },
-    { degree: 'MSBA', label: 'MSBA Alumni' },
+    { degree: 'PhD', label: 'PhD' },
+    { degree: 'MS', label: 'MS' },
+    { degree: 'MSBA', label: 'MSBA' },
   ];
 
   for (const group of degreeGroups) {
@@ -296,16 +297,25 @@ function generateLabHtml(members, publications) {
       return `              <li>${nameHtml}</li>`;
     }).join('\n');
 
-    cards.push(`          <div class="member-card fade-in">
+    alumniCards.push(`          <div class="member-card fade-in">
             <div class="member-avatar subtitle">${group.label}</div>
-            <h4>${group.label}</h4>
+            <h4>${group.label} Alumni</h4>
             <ul class="member-pubs">
 ${alumniItems}
             </ul>
           </div>`);
   }
 
-  return { html: cards.join('\n\n'), index: memberPubIndex };
+  const html = `        <h4 class="lab-group-subtitle fade-in">Current Members</h4>
+        <div class="member-grid">
+${currentCards.join('\n\n')}
+        </div>
+        <h4 class="lab-group-subtitle fade-in">Alumni</h4>
+        <div class="member-grid">
+${alumniCards.join('\n\n')}
+        </div>`;
+
+  return { html, index: memberPubIndex };
 }
 
 function generateAboutHtml(about) {
