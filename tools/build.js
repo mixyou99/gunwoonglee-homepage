@@ -31,9 +31,10 @@ function yearSortValue(year) {
 function typeSortKey(type) {
   if (type === 'journal') return 0;
   if (type === 'working') return 1;
-  if (type === 'progress') return 2;
-  if (type === 'conference') return 3;
-  return 4;
+  if (type === 'wp') return 2;
+  if (type === 'progress') return 3;
+  if (type === 'conference') return 4;
+  return 5;
 }
 
 function sortPublications(pubs) {
@@ -60,7 +61,23 @@ function sortPublications(pubs) {
   });
 }
 
-function generatePublicationHtml(pub) {
+// 공개 사이트 Publications 구성 — CV와 같은 순서·이름의 묶음
+const PUB_GROUPS = [
+  { type: 'journal', title: 'Published', note: 'Journal Articles', showYear: true },
+  { type: 'working', title: 'Journal Working Papers', note: 'Revise & Resubmit (R&R) / Under Review', showYear: true },
+  { type: 'wp', title: 'Working Papers', note: 'Complete manuscripts available at SSRN · target journals noted', showYear: false },
+  { type: 'progress', title: 'Work-in-Progress', note: '', showYear: false },
+  { type: 'conference', title: 'Conferences', note: 'Selected conference proceedings & presentations', showYear: false }
+];
+// CV처럼 2015년 이전 학회 발표는 한 묶음("~2015")으로 보여준다
+const CONF_EARLY_CUTOFF = 2015;
+const CONF_EARLY_LABEL = '~2015';
+
+function sortWithinGroup(pubs) {
+  return sortPublications(pubs);
+}
+
+function generatePublicationHtml(pub, showYear) {
   const year = escapeHtml(pub.year || '');
   const title = escapeHtml(pub.title || '');
   const authors = escapeHtml(pub.authors || '');
@@ -68,24 +85,158 @@ function generatePublicationHtml(pub) {
   const award = pub.award || '';
   const venue = pub.venue || '';
 
-  const awardSpan = award
-    ? ` <span style="color:var(--accent);font-size:0.8rem;">(${escapeHtml(award)})</span>`
-    : '';
+  const awardSpan = award ? ` <span class="pub-award">${escapeHtml(award)}</span>` : '';
+  const venueP = venue ? `\n    <p class="pub-venue"><em>${escapeHtml(venue)}</em></p>` : '';
+  const yearDiv = showYear ? `\n  <div class="pub-year">${year}</div>` : '';
+  const url = pub.url || '';
+  const titleHtml = url
+    ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${title}<span class="pub-link-icon" aria-hidden="true">&#8599;</span></a>`
+    : title;
 
-  const venueP = venue
-    ? `\n            <p class="pub-venue"><em>${escapeHtml(venue)}</em></p>`
-    : '';
-
-  return `        <div class="pub-item fade-in" data-type="${type}">
-          <div class="pub-year">${year}</div>
-          <div class="pub-details">
-            <h3>${title}${awardSpan}</h3>
-            <p class="pub-authors">${authors}</p>${venueP}
-          </div>
-        </div>`;
+  return `<div class="pub-item${showYear ? '' : ' no-year'}" data-type="${type}" data-id="${pub.id}">${yearDiv}
+  <div class="pub-details">
+    <h3>${titleHtml}${awardSpan}</h3>
+    <p class="pub-authors">${authors}</p>${venueP}
+  </div>
+</div>`;
 }
 
-function generateLabHtml(members) {
+function indentBlock(text, spaces) {
+  const pad = ' '.repeat(spaces);
+  return text.split('\n').map(line => (line ? pad + line : line)).join('\n');
+}
+
+function confYearKey(year) {
+  const num = parseInt(year, 10);
+  if (isNaN(num)) return String(year || 'Other');
+  return num <= CONF_EARLY_CUTOFF ? CONF_EARLY_LABEL : String(num);
+}
+
+function generateConferenceBody(pubs) {
+  const byYear = new Map();
+  for (const p of sortWithinGroup(pubs)) {
+    const key = confYearKey(p.year);
+    if (!byYear.has(key)) byYear.set(key, []);
+    byYear.get(key).push(p);
+  }
+  const rank = k => (k === CONF_EARLY_LABEL ? CONF_EARLY_CUTOFF : (parseInt(k, 10) || -1));
+  const keys = [...byYear.keys()].sort((a, b) => rank(b) - rank(a));
+
+  const buttons = keys.map((k, i) =>
+    `  <button class="pub-year-btn${i === 0 ? ' active' : ''}" data-year="${escapeHtml(k)}" role="tab" aria-selected="${i === 0}">${escapeHtml(k)}<span class="pub-year-count">${byYear.get(k).length}</span></button>`
+  ).join('\n');
+
+  const panels = keys.map((k, i) => {
+    const items = byYear.get(k).map(p => generatePublicationHtml(p, k === CONF_EARLY_LABEL)).join('\n');
+    return `<div class="pub-year-panel" data-year="${escapeHtml(k)}" role="tabpanel"${i === 0 ? '' : ' hidden'}>
+${indentBlock(items, 2)}
+</div>`;
+  }).join('\n');
+
+  return `<div class="pub-years" role="tablist" aria-label="Conference year">
+${buttons}
+</div>
+${panels}`;
+}
+
+function generatePublicationsHtml(publications) {
+  const known = new Set(PUB_GROUPS.map(g => g.type));
+  const groups = PUB_GROUPS.slice();
+  // 알 수 없는 종류가 생겨도 사라지지 않도록 맨 뒤에 따로 보여준다
+  for (const t of new Set(publications.map(p => p.type))) {
+    if (!known.has(t)) groups.push({ type: t, title: t || 'Other', note: '', showYear: true });
+  }
+
+  return groups.map(g => {
+    const pubs = publications.filter(p => p.type === g.type);
+    if (pubs.length === 0) return '';
+    const note = g.note ? `\n    <span class="pub-group-note">${escapeHtml(g.note)}</span>` : '';
+    const body = g.type === 'conference'
+      ? generateConferenceBody(pubs)
+      : `<div class="pub-group-items">
+${indentBlock(sortWithinGroup(pubs).map(p => generatePublicationHtml(p, g.showYear)).join('\n'), 2)}
+</div>`;
+    return `<div class="pub-group" data-group="${g.type}">
+  <div class="pub-group-head fade-in">
+    <h3 class="pub-group-title">${escapeHtml(g.title)}</h3>${note}
+    <span class="pub-group-count">${pubs.length}</span>
+  </div>
+${indentBlock(body, 2)}
+</div>`;
+  }).filter(Boolean).join('\n');
+}
+
+// 학생 이름 ↔ 같이 쓴 논문 매칭 (성 + 이름 첫 글자로 매칭, 흔한 성+이니셜 충돌은 수동 보정)
+const MEMBER_PUB_OVERRIDE_INCLUDE = {
+  'Seunghun Lee': [4],
+  'Seonyoung Lee': [82, 98, 99, 102],
+  // MSBA alumni (professional track, no co-authored research listed in CV) —
+  // force zero matches since last-name+initial matching produces false
+  // positives against unrelated authors with common Korean surnames.
+  'Jonghan Park': [],
+  'Jeonghyo Lee': [],
+  'Eunbyeol Shin': [],
+  'Heeseok Kim': [],
+  'Seongjin Jeon': [],
+  'Dasom Lee': [],
+  'Ayoung Kim': [],
+  'Jakyung Lee': [],
+  'Sujin Lee': [],
+  'Jeongeun Oh': [],
+  'Jonghan Kim': [],
+  'Eunchan Jang': [],
+  'Eunwon Cha': []
+};
+const MEMBER_PUB_OVERRIDE_EXCLUDE = {
+  'JeeHee Kim': [7, 13, 92, 138, 154, 175, 182, 212]
+};
+
+function authorTokens(authors) {
+  const a = (authors || '').replace(/\([^)]*\)/g, '').replace(/ and /g, ', ').replace(/&/g, ',');
+  const parts = a.split(',').map(s => s.trim()).filter(Boolean);
+  const out = [];
+  let i = 0;
+  while (i < parts.length - 1) {
+    const last = parts[i];
+    const m = parts[i + 1].match(/^([A-Z])(?:[-.][A-Z])*\.?$/);
+    if (m) {
+      out.push(last + '|' + m[1]);
+      i += 2;
+    } else {
+      i += 1;
+    }
+  }
+  return out;
+}
+
+function memberKey(name) {
+  const toks = (name || '').trim().split(/\s+/);
+  return toks[toks.length - 1] + '|' + toks[0][0];
+}
+
+function buildMemberPubIndex(members, publications) {
+  const visible = publications.filter(p => !p.hidden);
+  const idx = {};
+  for (const m of members) {
+    const key = memberKey(m.name);
+    let ids = visible.filter(p => authorTokens(p.authors).includes(key)).map(p => p.id);
+    if (MEMBER_PUB_OVERRIDE_INCLUDE[m.name]) ids = MEMBER_PUB_OVERRIDE_INCLUDE[m.name].slice();
+    if (MEMBER_PUB_OVERRIDE_EXCLUDE[m.name]) {
+      const excl = new Set(MEMBER_PUB_OVERRIDE_EXCLUDE[m.name]);
+      ids = ids.filter(id => !excl.has(id));
+    }
+    if (ids.length > 0) {
+      idx[m.id] = ids.map(id => {
+        const p = visible.find(x => x.id === id);
+        return { id: p.id, type: p.type, year: p.year, title: p.title, authors: p.authors, venue: p.venue, award: p.award || '', url: p.url || '' };
+      });
+    }
+  }
+  return idx;
+}
+
+function generateLabHtml(members, publications) {
+  const memberPubIndex = buildMemberPubIndex(members, publications || []);
   const current = members.filter(m => m.status === 'current');
   const alumni = members.filter(m => m.status === 'alumni');
 
@@ -108,9 +259,14 @@ function generateLabHtml(members) {
       pubsUl = `\n            <ul class="member-pubs">\n${items}\n            </ul>`;
     }
 
+    const hasPubs = !!memberPubIndex[member.id];
+    const nameHtml = hasPubs
+      ? `<button type="button" class="member-name-btn" data-member="${member.id}">${name}<span class="member-pub-badge">${memberPubIndex[member.id].length}</span></button>`
+      : name;
+
     cards.push(`          <div class="member-card fade-in">
             <div class="member-avatar">${degree}</div>
-            <h4>${name}</h4>${topicP}${pubsUl}
+            <h4>${nameHtml}</h4>${topicP}${pubsUl}
           </div>`);
   }
 
@@ -130,10 +286,14 @@ function generateLabHtml(members) {
       const placement = a.placement || '';
       const gradYear = a.gradYear || '';
       const details = [gradYear, placement].filter(Boolean).join(', ');
+      const hasPubs = !!memberPubIndex[a.id];
+      const nameHtml = hasPubs
+        ? `<button type="button" class="member-name-btn" data-member="${a.id}"><strong>${name}</strong><span class="member-pub-badge">${memberPubIndex[a.id].length}</span></button>`
+        : `<strong>${name}</strong>`;
       if (details) {
-        return `              <li><strong>${name}</strong> — ${escapeHtml(details)}</li>`;
+        return `              <li>${nameHtml} — ${escapeHtml(details)}</li>`;
       }
-      return `              <li><strong>${name}</strong></li>`;
+      return `              <li>${nameHtml}</li>`;
     }).join('\n');
 
     cards.push(`          <div class="member-card fade-in">
@@ -145,7 +305,7 @@ ${alumniItems}
           </div>`);
   }
 
-  return cards.join('\n\n');
+  return { html: cards.join('\n\n'), index: memberPubIndex };
 }
 
 function generateAboutHtml(about) {
@@ -160,11 +320,10 @@ function generateCvHtml(cv) {
   if (!cv) return '';
   const sections = [];
 
-  // Education
+  // Education (dates intentionally omitted per site policy)
   if (cv.education && cv.education.length > 0) {
-    const items = cv.education.map(e => `          <div class="timeline-item">
+    const items = cv.education.map(e => `          <div class="timeline-item no-date">
             <div class="timeline-dot"></div>
-            <div class="timeline-date">${escapeHtml(e.year)}</div>
             <div class="timeline-content">
               <h4>${escapeHtml(e.title)}</h4>
               <p>${escapeHtml(e.institution)}</p>
@@ -200,8 +359,9 @@ ${items}
       </div>`);
   }
 
-  // List sections: honors, service, consulting
+  // List sections: university service, honors, service, consulting
   const listSections = [
+    { key: 'universityService', title: 'University & School Service' },
     { key: 'honors', title: 'Honors & Awards' },
     { key: 'service', title: 'Academic Service' },
     { key: 'consulting', title: 'Industry Consulting' }
@@ -270,6 +430,55 @@ function generateNewsHtml(items) {
   }).join('\n');
 }
 
+const MEDIA_TYPE_LABELS = {
+  'article': 'Newspaper Article',
+  'video': 'Video',
+  'op-ed': 'Op-Ed'
+};
+
+function generateMediaHtml(items) {
+  if (!items || items.length === 0) {
+    return { html: '<p class="media-empty">No media items yet.</p>', filters: [] };
+  }
+  const typesPresent = [];
+  items.forEach(m => { if (!typesPresent.includes(m.type)) typesPresent.push(m.type); });
+
+  const cards = items.map(m => {
+    const linkHtml = m.link
+      ? ` <a href="${escapeHtml(m.link)}" target="_blank" rel="noopener">${escapeHtml(m.linkLabel || 'Link')}<span class="pub-link-icon" aria-hidden="true">&#8599;</span></a>`
+      : '';
+    const outlet = m.outlet ? `<span class="media-outlet">${escapeHtml(m.outlet)}</span>` : '';
+    return `        <div class="media-item fade-in" data-type="${escapeHtml(m.type)}">
+          <div class="media-type-badge">${escapeHtml(MEDIA_TYPE_LABELS[m.type] || m.type)}</div>
+          <div class="media-date">${escapeHtml(m.date)}</div>
+          <div class="media-content">
+            <h3>${escapeHtml(m.title)}</h3>
+            ${outlet}
+            <p>${m.content || ''}${linkHtml}</p>
+          </div>
+        </div>`;
+  }).join('\n');
+
+  return { html: cards, filters: typesPresent };
+}
+
+function generateMediaFilterHtml(filters) {
+  if (!filters || filters.length === 0) return '';
+  const buttons = ['        <button type="button" class="media-filter active" data-filter="all" aria-pressed="true">All</button>']
+    .concat(filters.map(t => `        <button type="button" class="media-filter" data-filter="${escapeHtml(t)}" aria-pressed="false">${escapeHtml(MEDIA_TYPE_LABELS[t] || t)}</button>`));
+  return buttons.join('\n');
+}
+
+function generateStoryHtml(items) {
+  if (!items || items.length === 0) {
+    return '<p class="story-empty">Photos coming soon.</p>';
+  }
+  return items.map(s => `        <figure class="story-item fade-in">
+          <img src="${escapeHtml(s.image)}" alt="${escapeHtml(s.caption || '')}" loading="lazy">
+          ${s.caption ? `<figcaption>${escapeHtml(s.caption)}</figcaption>` : ''}
+        </figure>`).join('\n');
+}
+
 function generateContactHtml(contact) {
   if (!contact) return '';
   const officeParts = (contact.office || '').split('\n');
@@ -322,15 +531,20 @@ function build() {
   const research = (data.research || []).filter(r => !r.hidden);
   const teaching = (data.teaching || []).filter(t => !t.hidden);
   const news = (data.news || []).filter(n => !n.hidden);
+  const media = (data.media || []).filter(m => !m.hidden);
+  const story = (data.story || []).filter(s => !s.hidden);
 
   // Generate and replace publications
-  const sortedPubs = sortPublications(publications);
-  const pubHtml = sortedPubs.map(generatePublicationHtml).join('\n');
+  const pubHtml = indentBlock(generatePublicationsHtml(publications), 8);
   html = replaceSection(html, '<!-- DATA:PUBLICATIONS:START -->', '<!-- DATA:PUBLICATIONS:END -->', pubHtml, '        ');
 
   // Generate and replace lab members
-  const labHtml = generateLabHtml(labMembers);
-  html = replaceSection(html, '<!-- DATA:LAB:START -->', '<!-- DATA:LAB:END -->', labHtml, '          ');
+  const labResult = generateLabHtml(labMembers, publications);
+  html = replaceSection(html, '<!-- DATA:LAB:START -->', '<!-- DATA:LAB:END -->', labResult.html, '          ');
+
+  // Embed the member -> co-authored-publications index for the client-side modal
+  const labPubJson = JSON.stringify(labResult.index);
+  html = replaceSection(html, '<!-- DATA:LABPUBS:START -->', '<!-- DATA:LABPUBS:END -->', labPubJson, '  ');
 
   // Generate and replace About
   const aboutHtml = generateAboutHtml(data.about);
@@ -351,6 +565,15 @@ function build() {
   // Generate and replace News
   const newsHtml = generateNewsHtml(news);
   html = replaceSection(html, '<!-- DATA:NEWS:START -->', '<!-- DATA:NEWS:END -->', newsHtml, '        ');
+
+  // Generate and replace Media
+  const mediaResult = generateMediaHtml(media);
+  html = replaceSection(html, '<!-- DATA:MEDIA:START -->', '<!-- DATA:MEDIA:END -->', mediaResult.html, '        ');
+  html = replaceSection(html, '<!-- DATA:MEDIA_FILTERS:START -->', '<!-- DATA:MEDIA_FILTERS:END -->', generateMediaFilterHtml(mediaResult.filters), '        ');
+
+  // Generate and replace Story
+  const storyHtml = generateStoryHtml(story);
+  html = replaceSection(html, '<!-- DATA:STORY:START -->', '<!-- DATA:STORY:END -->', storyHtml, '        ');
 
   // Generate and replace Contact
   const contactHtml = generateContactHtml(data.contact);
