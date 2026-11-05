@@ -1,0 +1,9 @@
+# GitHub Pages(Jekyll) 공개 범위 설정
+# 아래 파일·폴더는 저장소에는 남지만 www.gunwoonglee.com 에는 공개되지 않는다.
+# 공개 사이트는 index.html, css/, js/, assets/, CNAME 만 사용한다.
+exclude:
+  - admin.html
+  - start-admin.command
+  - tools
+  - data
+  - CLAUDE.md

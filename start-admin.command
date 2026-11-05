@@ -16,6 +16,16 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 
+# GitHub의 최신 내용 먼저 받아오기 (Claude가 고친 내용, GitHub 설정 변경 등)
+echo "최신 내용을 받아오는 중..."
+if git pull --rebase --autostash origin main; then
+  echo "✅ 최신 상태입니다."
+else
+  echo "⚠️ 최신 내용을 받아오지 못했습니다. 이 상태로 배포하면 거절될 수 있습니다."
+  echo "   인터넷 연결을 확인하고, 계속 안 되면 Claude에게 알려주세요."
+fi
+echo ""
+
 # 이미 3000 포트에서 서버가 돌고 있으면 브라우저만 열기
 if curl -s -o /dev/null "$URL"; then
   echo "이미 실행 중인 서버를 발견했습니다. 브라우저를 엽니다."

@@ -5,6 +5,12 @@ const { execSync } = require('child_process');
 const os = require('os');
 
 const PORT = 3000;
+// 보안: 이 컴퓨터에서만 접속 가능 (같은 와이파이의 다른 기기 차단)
+const HOST = '127.0.0.1';
+// 보안: 이 주소로 들어온 요청만 처리 (DNS rebinding 차단)
+const ALLOWED_HOSTS = new Set([`localhost:${PORT}`, `127.0.0.1:${PORT}`]);
+// 보안: 저장·빌드·배포 요청은 관리자 화면에서 보낸 것만 허용 (다른 웹사이트가 몰래 보내는 요청 차단)
+const ALLOWED_ORIGINS = new Set([`http://localhost:${PORT}`, `http://127.0.0.1:${PORT}`]);
 const ROOT_DIR = path.join(__dirname, '..');
 const DATA_PATH = path.join(ROOT_DIR, 'data', 'content.json');
 
@@ -190,6 +196,17 @@ const server = http.createServer(async (req, res) => {
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] ${req.method} ${req.url}`);
 
+  if (!ALLOWED_HOSTS.has(req.headers.host)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain' });
+    res.end('Forbidden: unexpected Host');
+    return;
+  }
+  if (req.method !== 'GET' && req.method !== 'HEAD' && !ALLOWED_ORIGINS.has(req.headers.origin)) {
+    res.writeHead(403, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Forbidden: requests must come from the admin page' }));
+    return;
+  }
+
   // API routes
   if (req.url === '/api/data' && req.method === 'GET') {
     try {
@@ -267,33 +284,34 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.url === '/api/deploy' && req.method === 'POST') {
+    const run = (cmd) => execSync(cmd, { cwd: ROOT_DIR, timeout: 60000 }).toString();
+    let output = '';
     try {
-      // Build first
+      // 1) GitHub에 먼저 올라온 변경(Claude 작업, GitHub 설정 변경 등)을 받아온다
+      output += run('git pull --rebase --autostash origin main 2>&1') + '\n';
+
+      // 2) 최신 content.json으로 index.html 다시 생성
       delete require.cache[require.resolve('./build.js')];
       const { build } = require('./build.js');
       build();
 
-      // Git add, commit, push
-      const gitCommands = [
-        'git add -A',
-        'git commit -m "Update site content" --allow-empty',
-        'git push origin main'
-      ];
-      let output = '';
-      for (const cmd of gitCommands) {
-        try {
-          output += execSync(cmd, { cwd: ROOT_DIR, timeout: 30000 }).toString() + '\n';
-        } catch (cmdErr) {
-          // git commit may fail if nothing to commit - that's ok
-          if (!cmd.includes('commit')) throw cmdErr;
-          output += 'Nothing new to commit.\n';
-        }
+      // 3) 사이트 내용 파일만 올린다 (로그·임시 파일이 섞여 들어가지 않게)
+      run('git add index.html data/content.json');
+      const staged = run('git diff --cached --name-only').trim();
+      if (staged) {
+        output += run('git commit -m "Update site content"') + '\n';
+      } else {
+        output += 'Nothing new to commit.\n';
       }
+
+      // 4) 배포
+      output += run('git push origin main 2>&1') + '\n';
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true, message: 'Deployed successfully', output }));
     } catch (err) {
+      const detail = [err.stdout, err.stderr].filter(Boolean).map(String).join('\n').trim();
       res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: err.message }));
+      res.end(JSON.stringify({ error: detail || err.message, output }));
     }
     return;
   }
@@ -329,6 +347,6 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
   console.log(`Admin panel: http://localhost:${PORT}/admin.html`);
 });
