@@ -169,7 +169,23 @@ ${indentBlock(body, 2)}
 // 학생 이름 ↔ 같이 쓴 논문 매칭 (성 + 이름 첫 글자로 매칭, 흔한 성+이니셜 충돌은 수동 보정)
 const MEMBER_PUB_OVERRIDE_INCLUDE = {
   'Seunghun Lee': [4],
-  'Seonyoung Lee': [82, 98, 99, 102]
+  'Seonyoung Lee': [82, 98, 99, 102],
+  // MSBA alumni (professional track, no co-authored research listed in CV) —
+  // force zero matches since last-name+initial matching produces false
+  // positives against unrelated authors with common Korean surnames.
+  'Jonghan Park': [],
+  'Jeonghyo Lee': [],
+  'Eunbyeol Shin': [],
+  'Heeseok Kim': [],
+  'Seongjin Jeon': [],
+  'Dasom Lee': [],
+  'Ayoung Kim': [],
+  'Jakyung Lee': [],
+  'Sujin Lee': [],
+  'Jeongeun Oh': [],
+  'Jonghan Kim': [],
+  'Eunchan Jang': [],
+  'Eunwon Cha': []
 };
 const MEMBER_PUB_OVERRIDE_EXCLUDE = {
   'JeeHee Kim': [7, 13, 92, 138, 154, 175, 182, 212]
@@ -343,8 +359,9 @@ ${items}
       </div>`);
   }
 
-  // List sections: honors, service, consulting
+  // List sections: university service, honors, service, consulting
   const listSections = [
+    { key: 'universityService', title: 'University & School Service' },
     { key: 'honors', title: 'Honors & Awards' },
     { key: 'service', title: 'Academic Service' },
     { key: 'consulting', title: 'Industry Consulting' }
