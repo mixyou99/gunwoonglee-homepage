@@ -149,3 +149,89 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     }
   });
 });
+
+// ===========================
+// Lab members: click a name to see co-authored publications
+// ===========================
+(() => {
+  const dataEl = document.getElementById('lab-pub-data');
+  const overlay = document.getElementById('memberModalOverlay');
+  if (!dataEl || !overlay) return;
+
+  let memberPubs = {};
+  try {
+    // HTML comments are not stripped inside <script> content, so the
+    // DATA:LABPUBS marker comments build.js uses to locate this block
+    // are still present in textContent — remove them before parsing.
+    const raw = (dataEl.textContent || '{}').replace(/<!--\s*DATA:LABPUBS:(START|END)\s*-->/g, '').trim();
+    memberPubs = JSON.parse(raw || '{}');
+  } catch (e) {
+    memberPubs = {};
+  }
+
+  const modalTitle = document.getElementById('memberModalTitle');
+  const modalList = document.getElementById('memberModalList');
+  const closeBtn = document.getElementById('memberModalClose');
+  let lastFocused = null;
+
+  const TYPE_LABELS = {
+    journal: 'Published',
+    working: 'Journal Working Paper',
+    wp: 'Working Paper',
+    progress: 'Work-in-Progress',
+    conference: 'Conference'
+  };
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  function renderModal(memberName, pubs) {
+    modalTitle.textContent = `Research with ${memberName}`;
+    modalList.innerHTML = pubs.map(p => {
+      const titleHtml = p.url
+        ? `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.title)}</a>`
+        : escapeHtml(p.title);
+      const meta = [p.year, p.venue].filter(Boolean).join(' · ');
+      return `<div class="member-modal-item">
+        <span class="member-modal-type">${escapeHtml(TYPE_LABELS[p.type] || p.type)}</span>
+        <h4>${titleHtml}</h4>
+        <p class="member-modal-meta">${escapeHtml(p.authors || '')}${meta ? ' — ' + escapeHtml(meta) : ''}</p>
+      </div>`;
+    }).join('');
+  }
+
+  function openModal(memberId, memberName) {
+    const pubs = memberPubs[memberId];
+    if (!pubs || pubs.length === 0) return;
+    renderModal(memberName, pubs);
+    lastFocused = document.activeElement;
+    overlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+    closeBtn.focus();
+  }
+
+  function closeModal() {
+    overlay.hidden = true;
+    document.body.style.overflow = '';
+    if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.member-name-btn');
+    if (!btn) return;
+    const memberId = btn.dataset.member;
+    const memberName = btn.textContent.trim().replace(/\d+$/, '').trim();
+    openModal(memberId, memberName);
+  });
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !overlay.hidden) closeModal();
+  });
+})();

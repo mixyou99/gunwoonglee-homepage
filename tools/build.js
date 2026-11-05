@@ -88,10 +88,14 @@ function generatePublicationHtml(pub, showYear) {
   const awardSpan = award ? ` <span class="pub-award">${escapeHtml(award)}</span>` : '';
   const venueP = venue ? `\n    <p class="pub-venue"><em>${escapeHtml(venue)}</em></p>` : '';
   const yearDiv = showYear ? `\n  <div class="pub-year">${year}</div>` : '';
+  const url = pub.url || '';
+  const titleHtml = url
+    ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${title}<span class="pub-link-icon" aria-hidden="true">&#8599;</span></a>`
+    : title;
 
-  return `<div class="pub-item${showYear ? '' : ' no-year'}" data-type="${type}">${yearDiv}
+  return `<div class="pub-item${showYear ? '' : ' no-year'}" data-type="${type}" data-id="${pub.id}">${yearDiv}
   <div class="pub-details">
-    <h3>${title}${awardSpan}</h3>
+    <h3>${titleHtml}${awardSpan}</h3>
     <p class="pub-authors">${authors}</p>${venueP}
   </div>
 </div>`;
@@ -162,7 +166,61 @@ ${indentBlock(body, 2)}
   }).filter(Boolean).join('\n');
 }
 
-function generateLabHtml(members) {
+// 학생 이름 ↔ 같이 쓴 논문 매칭 (성 + 이름 첫 글자로 매칭, 흔한 성+이니셜 충돌은 수동 보정)
+const MEMBER_PUB_OVERRIDE_INCLUDE = {
+  'Seunghun Lee': [4],
+  'Seonyoung Lee': [82, 98, 99, 102]
+};
+const MEMBER_PUB_OVERRIDE_EXCLUDE = {
+  'JeeHee Kim': [7, 13, 92, 138, 154, 175, 182, 212]
+};
+
+function authorTokens(authors) {
+  const a = (authors || '').replace(/\([^)]*\)/g, '').replace(/ and /g, ', ').replace(/&/g, ',');
+  const parts = a.split(',').map(s => s.trim()).filter(Boolean);
+  const out = [];
+  let i = 0;
+  while (i < parts.length - 1) {
+    const last = parts[i];
+    const m = parts[i + 1].match(/^([A-Z])(?:[-.][A-Z])*\.?$/);
+    if (m) {
+      out.push(last + '|' + m[1]);
+      i += 2;
+    } else {
+      i += 1;
+    }
+  }
+  return out;
+}
+
+function memberKey(name) {
+  const toks = (name || '').trim().split(/\s+/);
+  return toks[toks.length - 1] + '|' + toks[0][0];
+}
+
+function buildMemberPubIndex(members, publications) {
+  const visible = publications.filter(p => !p.hidden);
+  const idx = {};
+  for (const m of members) {
+    const key = memberKey(m.name);
+    let ids = visible.filter(p => authorTokens(p.authors).includes(key)).map(p => p.id);
+    if (MEMBER_PUB_OVERRIDE_INCLUDE[m.name]) ids = MEMBER_PUB_OVERRIDE_INCLUDE[m.name].slice();
+    if (MEMBER_PUB_OVERRIDE_EXCLUDE[m.name]) {
+      const excl = new Set(MEMBER_PUB_OVERRIDE_EXCLUDE[m.name]);
+      ids = ids.filter(id => !excl.has(id));
+    }
+    if (ids.length > 0) {
+      idx[m.id] = ids.map(id => {
+        const p = visible.find(x => x.id === id);
+        return { id: p.id, type: p.type, year: p.year, title: p.title, authors: p.authors, venue: p.venue, award: p.award || '', url: p.url || '' };
+      });
+    }
+  }
+  return idx;
+}
+
+function generateLabHtml(members, publications) {
+  const memberPubIndex = buildMemberPubIndex(members, publications || []);
   const current = members.filter(m => m.status === 'current');
   const alumni = members.filter(m => m.status === 'alumni');
 
@@ -185,9 +243,14 @@ function generateLabHtml(members) {
       pubsUl = `\n            <ul class="member-pubs">\n${items}\n            </ul>`;
     }
 
+    const hasPubs = !!memberPubIndex[member.id];
+    const nameHtml = hasPubs
+      ? `<button type="button" class="member-name-btn" data-member="${member.id}">${name}<span class="member-pub-badge">${memberPubIndex[member.id].length}</span></button>`
+      : name;
+
     cards.push(`          <div class="member-card fade-in">
             <div class="member-avatar">${degree}</div>
-            <h4>${name}</h4>${topicP}${pubsUl}
+            <h4>${nameHtml}</h4>${topicP}${pubsUl}
           </div>`);
   }
 
@@ -207,10 +270,14 @@ function generateLabHtml(members) {
       const placement = a.placement || '';
       const gradYear = a.gradYear || '';
       const details = [gradYear, placement].filter(Boolean).join(', ');
+      const hasPubs = !!memberPubIndex[a.id];
+      const nameHtml = hasPubs
+        ? `<button type="button" class="member-name-btn" data-member="${a.id}"><strong>${name}</strong><span class="member-pub-badge">${memberPubIndex[a.id].length}</span></button>`
+        : `<strong>${name}</strong>`;
       if (details) {
-        return `              <li><strong>${name}</strong> — ${escapeHtml(details)}</li>`;
+        return `              <li>${nameHtml} — ${escapeHtml(details)}</li>`;
       }
-      return `              <li><strong>${name}</strong></li>`;
+      return `              <li>${nameHtml}</li>`;
     }).join('\n');
 
     cards.push(`          <div class="member-card fade-in">
@@ -222,7 +289,7 @@ ${alumniItems}
           </div>`);
   }
 
-  return cards.join('\n\n');
+  return { html: cards.join('\n\n'), index: memberPubIndex };
 }
 
 function generateAboutHtml(about) {
@@ -405,8 +472,12 @@ function build() {
   html = replaceSection(html, '<!-- DATA:PUBLICATIONS:START -->', '<!-- DATA:PUBLICATIONS:END -->', pubHtml, '        ');
 
   // Generate and replace lab members
-  const labHtml = generateLabHtml(labMembers);
-  html = replaceSection(html, '<!-- DATA:LAB:START -->', '<!-- DATA:LAB:END -->', labHtml, '          ');
+  const labResult = generateLabHtml(labMembers, publications);
+  html = replaceSection(html, '<!-- DATA:LAB:START -->', '<!-- DATA:LAB:END -->', labResult.html, '          ');
+
+  // Embed the member -> co-authored-publications index for the client-side modal
+  const labPubJson = JSON.stringify(labResult.index);
+  html = replaceSection(html, '<!-- DATA:LABPUBS:START -->', '<!-- DATA:LABPUBS:END -->', labPubJson, '  ');
 
   // Generate and replace About
   const aboutHtml = generateAboutHtml(data.about);
