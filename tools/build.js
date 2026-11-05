@@ -64,7 +64,7 @@ function sortPublications(pubs) {
 // 공개 사이트 Publications 구성 — CV와 같은 순서·이름의 묶음
 const PUB_GROUPS = [
   { type: 'journal', title: 'Published', note: 'Journal Articles', showYear: true, showCount: false },
-  { type: 'working', title: 'Journal Working Papers', note: 'Revise & Resubmit (R&R) / Under Review', showYear: true },
+  { type: 'working', title: 'Journal Working Papers', note: 'Revise & Resubmit (R&R) / Under Review', showYear: false },
   { type: 'wp', title: 'Working Papers', note: 'Complete manuscripts available at SSRN · target journals noted', showYear: false },
   { type: 'progress', title: 'Work-in-Progress', note: '', showYear: false },
   { type: 'conference', title: 'Conferences', note: 'Selected conference proceedings & presentations', showYear: false }
@@ -279,7 +279,14 @@ function generateLabHtml(members, publications) {
   ];
 
   for (const group of degreeGroups) {
-    const groupAlumni = alumni.filter(a => a.degree === group.degree);
+    const groupAlumni = alumni.filter(a => a.degree === group.degree).slice().sort((a, b) => {
+      const ya = parseInt(a.gradYear, 10);
+      const yb = parseInt(b.gradYear, 10);
+      const aNum = !isNaN(ya), bNum = !isNaN(yb);
+      if (aNum && bNum) return ya - yb;
+      if (aNum !== bNum) return aNum ? -1 : 1; // unknown year sorts last
+      return 0;
+    });
     if (groupAlumni.length === 0) continue;
 
     const alumniItems = groupAlumni.map(a => {
