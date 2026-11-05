@@ -268,6 +268,54 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.url === '/api/upload-story-photo' && req.method === 'POST') {
+    try {
+      const contentType = req.headers['content-type'] || '';
+      const boundaryMatch = contentType.match(/boundary=(.+)/);
+      if (!boundaryMatch) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Missing multipart boundary' }));
+        return;
+      }
+
+      const rawBody = await readBodyRaw(req);
+      const parts = parseMultipart(rawBody, boundaryMatch[1]);
+      const ALLOWED_IMAGE_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
+      const filePart = parts.find(p => p.filename && ALLOWED_IMAGE_EXT.has(path.extname(p.filename).toLowerCase()));
+
+      if (!filePart) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'No image file found (jpg, png, webp, gif) in upload' }));
+        return;
+      }
+
+      const storyDir = path.join(ROOT_DIR, 'assets', 'story');
+      fs.mkdirSync(storyDir, { recursive: true });
+
+      // 안전한 파일명: 원래 이름을 영숫자/하이픈만 남기고 정리, 중복 시 타임스탬프 덧붙임
+      const ext = path.extname(filePart.filename).toLowerCase();
+      const base = path.basename(filePart.filename, ext)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'photo';
+      let safeName = `${base}${ext}`;
+      if (fs.existsSync(path.join(storyDir, safeName))) {
+        safeName = `${base}-${Date.now()}${ext}`;
+      }
+
+      fs.writeFileSync(path.join(storyDir, safeName), filePart.data);
+      const relPath = `assets/story/${safeName}`;
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, path: relPath }));
+    } catch (err) {
+      console.error('Upload story photo error:', err);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
   if (req.url === '/api/build' && req.method === 'POST') {
     try {
       // Clear require cache so build.js picks up changes

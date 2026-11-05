@@ -454,6 +454,18 @@
       font-size: 16px;
       font-weight: 600;
     }
+    .story-admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .story-admin-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      box-shadow: var(--shadow-sm);
+    }
     .cv-item-row {
       display: flex;
       align-items: center;
@@ -785,8 +797,10 @@
           <button class="tab-btn" data-tab="research">Research</button>
           <button class="tab-btn" data-tab="teaching">Teaching</button>
           <button class="tab-btn" data-tab="news">News</button>
+          <button class="tab-btn" data-tab="media">Media</button>
           <button class="tab-btn" data-tab="cv">CV</button>
           <button class="tab-btn" data-tab="contact">Contact</button>
+          <button class="tab-btn" data-tab="story">Story</button>
         </div>
         <button class="btn btn-preview" id="previewToggle" onclick="togglePreview()">&#x1F441; Preview</button>
         <button class="btn" style="background:var(--crimson);color:#fff;font-weight:600;" onclick="deployToGithub()">&#x1F680; Deploy</button>
@@ -901,6 +915,15 @@
         <div id="cvPositions"></div>
       </div>
 
+      <!-- University & School Service -->
+      <div class="cv-admin-section">
+        <div class="cv-admin-header">
+          <h3>University &amp; School Service</h3>
+          <button class="btn btn-sm btn-primary" onclick="addCvListItem('universityService')">+ Add</button>
+        </div>
+        <div id="cvUniversityService"></div>
+      </div>
+
       <!-- Honors & Awards -->
       <div class="cv-admin-section">
         <div class="cv-admin-header">
@@ -965,6 +988,17 @@
       <div id="newsItems"></div>
     </div>
 
+    <!-- Media Tab -->
+    <div class="tab-panel" id="panel-media">
+      <div class="toolbar">
+        <div class="toolbar-left"><div class="section-title" style="margin-bottom:0;">Media (Newspaper Articles, Op-Eds, Videos)</div></div>
+        <div class="toolbar-right">
+          <button class="btn btn-primary" onclick="openMediaModal()">+ Add Media Item</button>
+        </div>
+      </div>
+      <div id="mediaItems"></div>
+    </div>
+
     <!-- Contact Tab -->
     <div class="tab-panel" id="panel-contact">
       <div class="toolbar">
@@ -988,6 +1022,20 @@
           <textarea id="contactHours" rows="2" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;resize:vertical;" onchange="updateContact()"></textarea>
         </div>
       </div>
+    </div>
+
+    <!-- Story Tab -->
+    <div class="tab-panel" id="panel-story">
+      <div class="toolbar">
+        <div class="toolbar-left"><div class="section-title" style="margin-bottom:0;">Story (Photos)</div></div>
+        <div class="toolbar-right">
+          <label class="btn btn-primary" style="cursor:pointer;">
+            &#x1F4F7; Upload Photo
+            <input type="file" accept="image/*" style="display:none;" onchange="uploadStoryPhoto(this)">
+          </label>
+        </div>
+      </div>
+      <div id="storyItems" class="story-admin-grid"></div>
     </div>
   </main>
 
@@ -1051,6 +1099,10 @@
         <div class="form-group">
           <label>Award</label>
           <input type="text" id="pubAward" placeholder="e.g., Best Paper (leave empty if none)">
+        </div>
+        <div class="form-group">
+          <label>Link (official journal page, DOI, or SSRN — optional)</label>
+          <input type="text" id="pubUrl" placeholder="e.g., https://doi.org/10.1287/isre.2022.0421">
         </div>
       </div>
       <div class="modal-footer">
@@ -1151,6 +1203,59 @@
       <div class="modal-footer">
         <button class="btn" onclick="closeNewsModal()">Cancel</button>
         <button class="btn btn-primary" onclick="saveNews()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Media Modal -->
+  <div class="modal-overlay" id="mediaModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="mediaModalTitle">Add Media Item</h2>
+        <button class="modal-close" onclick="closeMediaModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="mediaId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type</label>
+            <select id="mediaType">
+              <option value="article">Newspaper Article</option>
+              <option value="op-ed">Op-Ed</option>
+              <option value="video">Video</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="text" id="mediaDate" placeholder="e.g., 2025, Feb 2024">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="mediaTitleInput" placeholder="Headline">
+        </div>
+        <div class="form-group">
+          <label>Outlet (optional)</label>
+          <input type="text" id="mediaOutlet" placeholder="e.g., The Economist (Korea)">
+        </div>
+        <div class="form-group">
+          <label>Content (HTML allowed: &lt;em&gt;, &lt;strong&gt;)</label>
+          <textarea id="mediaContent" rows="3" placeholder="Description..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Link URL (optional)</label>
+            <input type="text" id="mediaLink" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Link Label</label>
+            <input type="text" id="mediaLinkLabel" placeholder="e.g., Read Article, Watch Video">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeMediaModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveMedia()">Save</button>
       </div>
     </div>
   </div>
@@ -1264,8 +1369,10 @@
       renderResearch();
       renderTeaching();
       renderNews();
+      renderMedia();
       renderCv();
       renderContact();
+      renderStory();
     }
 
     // ----- 수동 정렬 지원 (publication order) -----
@@ -1357,7 +1464,7 @@
             </div>
           </td>
           <td style="font-weight:600;white-space:nowrap;">${esc(p.year)}</td>
-          <td class="pub-title" title="${esc(p.title)}">${esc(p.title)}</td>
+          <td class="pub-title" title="${esc(p.title)}">${esc(p.title)}${p.url ? ` <a href="${esc(p.url)}" target="_blank" rel="noopener" title="${esc(p.url)}" style="color:var(--crimson);text-decoration:none;" onclick="event.stopPropagation()">&#128279;</a>` : ''}</td>
           <td class="pub-authors" title="${esc(p.authors)}">${esc(p.authors)}</td>
           <td><span class="badge badge-${p.type}">${typeLabel(p.type)}</span></td>
           <td>${p.award ? `<span class="badge badge-award">${esc(p.award)}</span>` : '<span style="color:var(--text-muted);">-</span>'}</td>
@@ -1455,6 +1562,7 @@
       document.getElementById('pubAuthors').value = pub ? pub.authors : '';
       document.getElementById('pubVenue').value = pub ? pub.venue : '';
       document.getElementById('pubAward').value = pub ? pub.award : '';
+      document.getElementById('pubUrl').value = pub ? (pub.url || '') : '';
       document.getElementById('pubModalOverlay').classList.add('active');
     }
 
@@ -1475,7 +1583,8 @@
         title: document.getElementById('pubTitleInput').value.trim(),
         authors: document.getElementById('pubAuthors').value.trim(),
         venue: document.getElementById('pubVenue').value.trim(),
-        award: document.getElementById('pubAward').value.trim()
+        award: document.getElementById('pubAward').value.trim(),
+        url: document.getElementById('pubUrl').value.trim()
       };
 
       if (!pubData.title || !pubData.authors) {
@@ -1698,10 +1807,11 @@
     // ==================== CV CRUD ====================
     function renderCv() {
       if (!data.cv) {
-        data.cv = { education: [], positions: [], honors: [], service: [], consulting: [] };
+        data.cv = { education: [], positions: [], universityService: [], honors: [], service: [], consulting: [] };
       }
       renderCvTimeline('cvEducation', data.cv.education || [], 'education');
       renderCvPositions('cvPositions', data.cv.positions || []);
+      renderCvList('cvUniversityService', data.cv.universityService || [], 'universityService');
       renderCvList('cvHonors', data.cv.honors || [], 'honors');
       renderCvList('cvService', data.cv.service || [], 'service');
       renderCvList('cvConsulting', data.cv.consulting || [], 'consulting');
@@ -1982,6 +2092,137 @@
       if (!n || !confirm(`Delete "${n.title}"?`)) return;
       data.news = data.news.filter(x => x.id !== id);
       renderNews();
+      saveData();
+    }
+
+    // ==================== Media CRUD ====================
+    const MEDIA_TYPE_LABELS = { article: 'Newspaper Article', 'op-ed': 'Op-Ed', video: 'Video' };
+
+    function renderMedia() {
+      if (!data.media) data.media = [];
+      document.getElementById('mediaItems').innerHTML = data.media.length
+        ? data.media.map(m => `
+          <div class="cv-admin-section ${m.hidden ? 'item-hidden' : ''}" style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <span class="badge" style="background:var(--crimson-light,#f5e2e2);color:var(--crimson);">${esc(MEDIA_TYPE_LABELS[m.type] || m.type)}</span>
+                <span style="font-weight:600;color:var(--crimson);font-size:13px;margin-left:8px;">${esc(m.date)}</span>
+                <h4 style="margin:4px 0;font-size:15px;">${esc(m.title)}</h4>
+                ${m.outlet ? `<p style="font-size:12px;color:var(--text-muted);margin:2px 0;">${esc(m.outlet)}</p>` : ''}
+                <p style="font-size:13px;color:var(--text-secondary);margin-top:4px;">${esc(m.content || '').substring(0, 120)}${(m.content || '').length > 120 ? '...' : ''}</p>
+                ${m.link ? `<a href="${esc(m.link)}" target="_blank" style="font-size:12px;color:var(--crimson);">[${esc(m.linkLabel || 'Link')}]</a>` : ''}
+              </div>
+              <div class="actions-cell" style="flex-shrink:0;margin-left:12px;">
+                <button class="btn btn-sm btn-icon" onclick="editMedia(${m.id})" title="Edit">&#9998;</button>
+                <button class="btn-hide ${m.hidden ? 'is-hidden' : ''}" onclick="toggleHidden('media', ${m.id})">${m.hidden ? 'Show' : 'Hide'}</button>
+                <button class="btn btn-sm btn-icon btn-danger" onclick="deleteMedia(${m.id})" title="Delete">&#10005;</button>
+              </div>
+            </div>
+          </div>
+        `).join('')
+        : '<div class="empty-state"><p>No media items yet.</p></div>';
+    }
+
+    function openMediaModal(media) {
+      document.getElementById('mediaModalTitle').textContent = media ? 'Edit Media Item' : 'Add Media Item';
+      document.getElementById('mediaId').value = media ? media.id : '';
+      document.getElementById('mediaType').value = media ? media.type : 'article';
+      document.getElementById('mediaDate').value = media ? media.date : '';
+      document.getElementById('mediaTitleInput').value = media ? media.title : '';
+      document.getElementById('mediaOutlet').value = media ? (media.outlet || '') : '';
+      document.getElementById('mediaContent').value = media ? (media.content || '') : '';
+      document.getElementById('mediaLink').value = media ? (media.link || '') : '';
+      document.getElementById('mediaLinkLabel').value = media ? (media.linkLabel || '') : '';
+      document.getElementById('mediaModalOverlay').classList.add('active');
+    }
+    function closeMediaModal() { document.getElementById('mediaModalOverlay').classList.remove('active'); }
+    function editMedia(id) { const m = data.media.find(x => x.id === id); if (m) openMediaModal(m); }
+    function saveMedia() {
+      const id = document.getElementById('mediaId').value;
+      const md = {
+        type: document.getElementById('mediaType').value,
+        date: document.getElementById('mediaDate').value.trim(),
+        title: document.getElementById('mediaTitleInput').value.trim(),
+        outlet: document.getElementById('mediaOutlet').value.trim(),
+        content: document.getElementById('mediaContent').value.trim(),
+        link: document.getElementById('mediaLink').value.trim(),
+        linkLabel: document.getElementById('mediaLinkLabel').value.trim()
+      };
+      if (!md.title) { toast('Title is required.', 'error'); return; }
+      if (id) {
+        const idx = data.media.findIndex(m => m.id === parseInt(id));
+        if (idx !== -1) data.media[idx] = { ...data.media[idx], ...md };
+      } else {
+        const maxId = data.media.reduce((max, m) => Math.max(max, m.id), 0);
+        data.media.push({ id: maxId + 1, ...md });
+      }
+      closeMediaModal();
+      renderMedia();
+      saveData();
+    }
+    function deleteMedia(id) {
+      const m = data.media.find(x => x.id === id);
+      if (!m || !confirm(`Delete "${m.title}"?`)) return;
+      data.media = data.media.filter(x => x.id !== id);
+      renderMedia();
+      saveData();
+    }
+
+    // ==================== Story (Photos) CRUD ====================
+    function renderStory() {
+      if (!data.story) data.story = [];
+      document.getElementById('storyItems').innerHTML = data.story.length
+        ? data.story.map(s => `
+          <div class="story-admin-card ${s.hidden ? 'item-hidden' : ''}">
+            <img src="../${esc(s.image)}" alt="${esc(s.caption || '')}" style="width:100%;height:150px;object-fit:cover;border-radius:6px;">
+            <input type="text" value="${esc(s.caption || '')}" placeholder="Caption (optional)" style="width:100%;margin-top:8px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;" onchange="updateStoryCaption(${s.id}, this.value)">
+            <div class="actions-cell" style="margin-top:8px;justify-content:flex-end;">
+              <button class="btn-hide ${s.hidden ? 'is-hidden' : ''}" onclick="toggleHidden('story', ${s.id})">${s.hidden ? 'Show' : 'Hide'}</button>
+              <button class="btn btn-sm btn-icon btn-danger" onclick="deleteStory(${s.id})" title="Delete">&#10005;</button>
+            </div>
+          </div>
+        `).join('')
+        : '<div class="empty-state"><p>No photos yet. Click "Upload Photo" above to add one.</p></div>';
+    }
+
+    async function uploadStoryPhoto(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      showLoading(true);
+      try {
+        const formData = new FormData();
+        formData.append('photo', file, file.name);
+        const res = await fetch('/api/upload-story-photo', { method: 'POST', body: formData });
+        const result = await res.json();
+        if (!res.ok || result.error) throw new Error(result.error || 'Upload failed');
+
+        if (!data.story) data.story = [];
+        const maxId = data.story.reduce((max, s) => Math.max(max, s.id), 0);
+        data.story.push({ id: maxId + 1, image: result.path, caption: '', hidden: false });
+
+        renderStory();
+        await saveData();
+        toast('Photo uploaded.', 'success');
+      } catch (err) {
+        toast('Upload failed: ' + err.message, 'error');
+      } finally {
+        input.value = '';
+        showLoading(false);
+      }
+    }
+
+    function updateStoryCaption(id, value) {
+      const s = data.story.find(x => x.id === id);
+      if (!s) return;
+      s.caption = value.trim();
+      saveData();
+    }
+
+    function deleteStory(id) {
+      const s = data.story.find(x => x.id === id);
+      if (!s || !confirm('Delete this photo? (the image file stays in assets/story/, only the entry is removed)')) return;
+      data.story = data.story.filter(x => x.id !== id);
+      renderStory();
       saveData();
     }
 
@@ -2297,18 +2538,6 @@
         toast('No items were selected for import', 'error');
       }
     }
-
-    // ==================== Updated Render ====================
-    renderAll = function() {
-      renderPublications();
-      renderMembers();
-      renderAbout();
-      renderCv();
-      renderResearch();
-      renderTeaching();
-      renderNews();
-      renderContact();
-    };
 
     // ==================== Init ====================
     loadData();
