@@ -702,6 +702,18 @@ img {
   margin-bottom: 24px;
 }
 
+.lab-group-subtitle {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.lab-group-subtitle:not(:first-child) {
+  margin-top: 40px;
+}
+
 .member-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -736,6 +748,16 @@ img {
   font-weight: 700;
   letter-spacing: 0.05em;
   margin-bottom: 16px;
+}
+
+.member-avatar.subtitle {
+  width: 56px;
+  height: 56px;
+  font-size: 0.65rem;
+  letter-spacing: 0.02em;
+  padding: 0 4px;
+  text-align: center;
+  line-height: 1.1;
 }
 
 .member-card h4 {
