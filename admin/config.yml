@@ -27,10 +27,10 @@ collections:
             widget: "list"
             summary: "{{fields.date}} - {{fields.title}}"
             fields:
-              - { label: "ID (기존 목록에서 가장 큰 숫자 + 1로 입력)", name: "id", widget: "number", value_type: "int" }
-              - { label: "날짜 (예: 2026)", name: "date", widget: "string" }
-              - { label: "제목", name: "title", widget: "string" }
-              - { label: "내용 (간단한 HTML 태그 <em>, <strong> 사용 가능)", name: "content", widget: "text" }
+              - { label: "ID (기존 목록에서 가장 큰 숫자 + 1로 입력)", name: "id", widget: "number", value_type: "int", required: false }
+              - { label: "날짜 (예: 2026)", name: "date", widget: "string", required: false }
+              - { label: "제목", name: "title", widget: "string", required: false }
+              - { label: "내용 (간단한 HTML 태그 <em>, <strong> 사용 가능)", name: "content", widget: "text", required: false }
               - { label: "관련 링크 (선택)", name: "link", widget: "string", required: false, default: "" }
               - { label: "링크에 표시할 텍스트 (선택)", name: "linkLabel", widget: "string", required: false, default: "" }
               - { label: "사이트에서 숨기기", name: "hidden", widget: "boolean", default: false }
@@ -47,13 +47,14 @@ collections:
             widget: "list"
             summary: "{{fields.name}} ({{fields.status}})"
             fields:
-              - { label: "ID (기존 목록에서 가장 큰 숫자 + 1로 입력, 본인 소개 수정 시 그대로 둘 것)", name: "id", widget: "number", value_type: "int" }
-              - { label: "이름", name: "name", widget: "string" }
-              - { label: "학위 과정 (예: PhD, MS)", name: "degree", widget: "string" }
-              - { label: "연구 주제", name: "topic", widget: "string" }
+              - { label: "ID (기존 목록에서 가장 큰 숫자 + 1로 입력, 본인 소개 수정 시 그대로 둘 것)", name: "id", widget: "number", value_type: "int", required: false }
+              - { label: "이름", name: "name", widget: "string", required: false }
+              - { label: "학위 과정 (예: PhD, MS)", name: "degree", widget: "string", required: false }
+              - { label: "연구 주제", name: "topic", widget: "string", required: false }
               - label: "대표 논문 목록"
                 name: "pubs"
                 widget: "list"
-                field: { label: "논문", name: "pub", widget: "string" }
-              - { label: "상태", name: "status", widget: "select", options: ["current", "alumni"] }
+                required: false
+                field: { label: "논문", name: "pub", widget: "string", required: false }
+              - { label: "상태", name: "status", widget: "select", options: ["current", "alumni"], required: false }
               - { label: "졸업 후 진로 (alumni인 경우만)", name: "placement", widget: "string", required: false, default: "" }
