@@ -190,6 +190,8 @@ img {
   border: none;
   cursor: pointer;
   padding: 4px;
+  position: relative;
+  z-index: 1101;
 }
 
 .nav-toggle span {
