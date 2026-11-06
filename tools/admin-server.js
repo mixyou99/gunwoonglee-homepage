@@ -13,6 +13,8 @@ const ALLOWED_HOSTS = new Set([`localhost:${PORT}`, `127.0.0.1:${PORT}`]);
 const ALLOWED_ORIGINS = new Set([`http://localhost:${PORT}`, `http://127.0.0.1:${PORT}`]);
 const ROOT_DIR = path.join(__dirname, '..');
 const DATA_PATH = path.join(ROOT_DIR, 'data', 'content.json');
+const NEWS_PATH = path.join(ROOT_DIR, 'data', 'news.json');
+const LAB_PATH = path.join(ROOT_DIR, 'data', 'lab.json');
 
 const MIME_TYPES = {
   '.html': 'text/html',
@@ -210,9 +212,13 @@ const server = http.createServer(async (req, res) => {
   // API routes
   if (req.url === '/api/data' && req.method === 'GET') {
     try {
-      const data = fs.readFileSync(DATA_PATH, 'utf8');
+      // news/labMembers는 별도 파일(data/news.json, data/lab.json)로 분리되어 있음 (CMS 연동용) - 합쳐서 응답
+      const content = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
+      const news = JSON.parse(fs.readFileSync(NEWS_PATH, 'utf8'));
+      const lab = JSON.parse(fs.readFileSync(LAB_PATH, 'utf8'));
+      const merged = { ...content, news: news.news, labMembers: lab.labMembers };
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(data);
+      res.end(JSON.stringify(merged));
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: err.message }));
@@ -223,9 +229,14 @@ const server = http.createServer(async (req, res) => {
   if (req.url === '/api/data' && req.method === 'POST') {
     try {
       const body = await readBody(req);
-      // Validate JSON
-      JSON.parse(body);
-      fs.writeFileSync(DATA_PATH, body, 'utf8');
+      const full = JSON.parse(body); // Validate + parse
+
+      // news/labMembers는 별도 파일로 다시 분리해서 저장 (CMS가 건드리는 범위를 파일 단위로 분리해두기 위함)
+      const { news, labMembers, ...rest } = full;
+      fs.writeFileSync(NEWS_PATH, JSON.stringify({ news: news || [] }), 'utf8');
+      fs.writeFileSync(LAB_PATH, JSON.stringify({ labMembers: labMembers || [] }), 'utf8');
+      fs.writeFileSync(DATA_PATH, JSON.stringify(rest), 'utf8');
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true, message: 'Data saved successfully' }));
     } catch (err) {
@@ -344,7 +355,7 @@ const server = http.createServer(async (req, res) => {
       build();
 
       // 3) 사이트 내용 파일만 올린다 (로그·임시 파일이 섞여 들어가지 않게)
-      run('git add index.html data/content.json');
+      run('git add index.html data/content.json data/news.json data/lab.json');
       const staged = run('git diff --cached --name-only').trim();
       if (staged) {
         output += run('git commit -m "Update site content"') + '\n';
