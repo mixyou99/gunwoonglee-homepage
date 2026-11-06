@@ -1,0 +1,62 @@
+backend:
+  name: github
+  repo: mixyou99/gunwoonglee-homepage
+  branch: main
+  # TODO: 교수님 - 아래 base_url을 실제 배포한 OAuth 프록시 주소로 바꿔주세요.
+  # (가이드의 "2단계: Vercel에 로그인 처리 서버 배포"에서 받는 주소입니다. 예: https://gwlab-cms-auth.vercel.app)
+  base_url: https://REPLACE-ME.vercel.app
+  auth_endpoint: api/auth
+
+# 저장하면 바로 main에 반영되지 않고, 별도 브랜치 + Pull Request가 생성됩니다.
+# 교수님이 깃허브에서 확인 후 "Merge"를 눌러야 실제 사이트에 반영됩니다.
+publish_mode: editorial_workflow
+
+media_folder: "assets/uploads"
+public_folder: "/assets/uploads"
+
+# 편집 가능 범위: News, Lab 멤버 소개 (두 가지로 제한)
+# 논문(Publications), CV, About, Research 등 나머지 데이터는 이 CMS에서 아예 보이지도, 건드릴 수도 없습니다.
+# (data/news.json, data/lab.json 파일만 다루도록 물리적으로 분리되어 있음)
+collections:
+  - name: "news"
+    label: "News (소식·공지)"
+    files:
+      - name: "news"
+        label: "News 목록"
+        file: "data/news.json"
+        fields:
+          - label: "News 항목"
+            name: "news"
+            widget: "list"
+            summary: "{{fields.date}} - {{fields.title}}"
+            fields:
+              - { label: "ID (기존 목록에서 가장 큰 숫자 + 1로 입력)", name: "id", widget: "number", value_type: "int" }
+              - { label: "날짜 (예: 2026)", name: "date", widget: "string" }
+              - { label: "제목", name: "title", widget: "string" }
+              - { label: "내용 (간단한 HTML 태그 <em>, <strong> 사용 가능)", name: "content", widget: "text" }
+              - { label: "관련 링크 (선택)", name: "link", widget: "string", required: false, default: "" }
+              - { label: "링크에 표시할 텍스트 (선택)", name: "linkLabel", widget: "string", required: false, default: "" }
+              - { label: "사이트에서 숨기기", name: "hidden", widget: "boolean", default: false }
+
+  - name: "lab"
+    label: "Lab 멤버 소개"
+    files:
+      - name: "lab"
+        label: "Lab 멤버 목록"
+        file: "data/lab.json"
+        fields:
+          - label: "Lab 멤버"
+            name: "labMembers"
+            widget: "list"
+            summary: "{{fields.name}} ({{fields.status}})"
+            fields:
+              - { label: "ID (기존 목록에서 가장 큰 숫자 + 1로 입력, 본인 소개 수정 시 그대로 둘 것)", name: "id", widget: "number", value_type: "int" }
+              - { label: "이름", name: "name", widget: "string" }
+              - { label: "학위 과정 (예: PhD, MS)", name: "degree", widget: "string" }
+              - { label: "연구 주제", name: "topic", widget: "string" }
+              - label: "대표 논문 목록"
+                name: "pubs"
+                widget: "list"
+                field: { label: "논문", name: "pub", widget: "string" }
+              - { label: "상태", name: "status", widget: "select", options: ["current", "alumni"] }
+              - { label: "졸업 후 진로 (alumni인 경우만)", name: "placement", widget: "string", required: false, default: "" }
