@@ -5,7 +5,6 @@ backend:
   # TODO: 교수님 - 아래 base_url을 실제 배포한 OAuth 프록시 주소로 바꿔주세요.
   # (가이드의 "2단계: Vercel에 로그인 처리 서버 배포"에서 받는 주소입니다. 예: https://gwlab-cms-auth.vercel.app)
   base_url: https://REPLACE-ME.vercel.app
-  auth_endpoint: api/auth
 
 # 저장하면 바로 main에 반영되지 않고, 별도 브랜치 + Pull Request가 생성됩니다.
 # 교수님이 깃허브에서 확인 후 "Merge"를 눌러야 실제 사이트에 반영됩니다.
