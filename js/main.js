@@ -16,6 +16,11 @@ window.addEventListener('scroll', () => {
 });
 
 // Mobile menu toggle
+function closeMobileMenu() {
+  navToggle.classList.remove('active');
+  navMenu.classList.remove('active');
+}
+
 navToggle.addEventListener('click', () => {
   navToggle.classList.toggle('active');
   navMenu.classList.toggle('active');
@@ -24,9 +29,26 @@ navToggle.addEventListener('click', () => {
 // Close mobile menu on link click
 navLinks.forEach(link => {
   link.addEventListener('click', () => {
-    navToggle.classList.remove('active');
-    navMenu.classList.remove('active');
+    closeMobileMenu();
   });
+});
+
+// Close mobile menu when clicking outside it
+document.addEventListener('click', (e) => {
+  if (
+    navMenu.classList.contains('active') &&
+    !navMenu.contains(e.target) &&
+    !navToggle.contains(e.target)
+  ) {
+    closeMobileMenu();
+  }
+});
+
+// Close mobile menu on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+    closeMobileMenu();
+  }
 });
 
 // Active nav link on scroll
