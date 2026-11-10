@@ -11,9 +11,9 @@ publish_mode: editorial_workflow
 media_folder: "assets/uploads"
 public_folder: "/assets/uploads"
 
-# 편집 가능 범위: News, Lab 멤버 소개 (두 가지로 제한)
+# 편집 가능 범위: News, Lab 멤버 소개, Media(언론 보도) (세 가지로 제한)
 # 논문(Publications), CV, About, Research 등 나머지 데이터는 이 CMS에서 아예 보이지도, 건드릴 수도 없습니다.
-# (data/news.json, data/lab.json 파일만 다루도록 물리적으로 분리되어 있음)
+# (data/news.json, data/lab.json, data/media.json 파일만 다루도록 물리적으로 분리되어 있음)
 collections:
   - name: "news"
     label: "News (소식·공지)"
@@ -58,3 +58,26 @@ collections:
                 field: { label: "논문", name: "pub", widget: "string", required: false }
               - { label: "상태", name: "status", widget: "select", options: ["current", "alumni"], required: false }
               - { label: "졸업 후 진로 (alumni인 경우만)", name: "placement", widget: "string", required: false, default: "" }
+
+  - name: "media"
+    label: "Media (언론 보도)"
+    files:
+      - name: "media"
+        label: "Media 목록"
+        file: "data/media.json"
+        fields:
+          - label: "언론 보도 항목"
+            name: "media"
+            widget: "list"
+            summary: "{{fields.date}} - {{fields.title}}"
+            fields:
+              - { label: "ID (기존 목록에서 가장 큰 숫자 + 1로 입력)", name: "id", widget: "number", value_type: "int", required: false }
+              - { label: "종류", name: "type", widget: "select", options: ["article", "op-ed", "video"], required: false }
+              - { label: "날짜 (예: Dec 2025)", name: "date", widget: "string", required: false }
+              - { label: "제목", name: "title", widget: "string", required: false }
+              - { label: "매체명", name: "outlet", widget: "string", required: false, default: "" }
+              - { label: "요약 내용", name: "content", widget: "text", required: false, default: "" }
+              - { label: "기사 링크", name: "link", widget: "string", required: false, default: "" }
+              - { label: "링크에 표시할 텍스트 (선택, 기본값 Read Article)", name: "linkLabel", widget: "string", required: false, default: "" }
+              - { label: "대표 카드로 표시 (끄면 '그 외 언론 보도' 목록으로 내려감)", name: "highlight", widget: "boolean", default: true }
+              - { label: "사이트에서 숨기기", name: "hidden", widget: "boolean", default: false }
