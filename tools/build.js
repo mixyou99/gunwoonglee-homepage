@@ -477,11 +477,13 @@ function generateMediaHtml(items) {
 
   const cards = highlightItems.map(m => {
     // 보도(Newspaper Article)는 기사에 등장하는 회사명 등이 민감할 수 있어
-    // 교수님 요청으로 제목·본문을 블러 처리하고 원문 링크는 비활성화한다.
-    // 본인이 쓴 기고(op-ed)는 그대로 노출.
+    // 교수님 요청으로 제목만 블러 처리하고, 원문 링크는 글자는 보이되 클릭은 막는다.
+    // 본문과 매체명은 그대로 노출. 본인이 쓴 기고(op-ed)는 전부 그대로 노출.
     const isSensitive = m.type === 'article';
-    const linkHtml = (m.link && !isSensitive)
-      ? ` <a href="${escapeHtml(m.link)}" target="_blank" rel="noopener">${escapeHtml(m.linkLabel || 'Link')}<span class="pub-link-icon" aria-hidden="true">&#8599;</span></a>`
+    const linkHtml = m.link
+      ? (isSensitive
+        ? ` <span class="media-link-disabled" aria-disabled="true">${escapeHtml(m.linkLabel || 'Link')}<span class="pub-link-icon" aria-hidden="true">&#8599;</span></span>`
+        : ` <a href="${escapeHtml(m.link)}" target="_blank" rel="noopener">${escapeHtml(m.linkLabel || 'Link')}<span class="pub-link-icon" aria-hidden="true">&#8599;</span></a>`)
       : '';
     const outlet = m.outlet ? `<span class="media-outlet">${escapeHtml(m.outlet)}</span>` : '';
     const blurAttr = isSensitive ? ' class="media-blurred"' : '';
@@ -491,7 +493,7 @@ function generateMediaHtml(items) {
           <div class="media-content">
             <h3${blurAttr}>${escapeHtml(m.title)}</h3>
             ${outlet}
-            <p${blurAttr}>${m.content || ''}${linkHtml}</p>
+            <p>${m.content || ''}${linkHtml}</p>
           </div>
         </div>`;
   }).join('\n');
@@ -518,9 +520,9 @@ ${rows}
 }
 
 function generateMediaFilterHtml(filters) {
+  // "All" 버튼은 교수님 요청으로 제거. 첫 번째 타입(Op-Ed)을 기본 선택 상태로 보여준다.
   if (!filters || filters.length === 0) return '';
-  const buttons = ['        <button type="button" class="media-filter active" data-filter="all" aria-pressed="true">All</button>']
-    .concat(filters.map(t => `        <button type="button" class="media-filter" data-filter="${escapeHtml(t)}" aria-pressed="false">${escapeHtml(MEDIA_TYPE_LABELS[t] || t)}</button>`));
+  const buttons = filters.map((t, i) => `        <button type="button" class="media-filter${i === 0 ? ' active' : ''}" data-filter="${escapeHtml(t)}" aria-pressed="${i === 0 ? 'true' : 'false'}">${escapeHtml(MEDIA_TYPE_LABELS[t] || t)}</button>`);
   return buttons.join('\n');
 }
 
