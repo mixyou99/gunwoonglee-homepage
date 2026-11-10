@@ -466,21 +466,32 @@ function generateMediaHtml(items) {
   const highlightItems = items.filter(m => m.highlight !== false);
   const otherItems = items.filter(m => m.highlight === false);
 
+  // 필터 버튼 순서: Op-Ed를 Newspaper Article보다 먼저 보여달라는 요청 반영
+  const TYPE_ORDER = ['op-ed', 'article', 'video'];
   const typesPresent = [];
   highlightItems.forEach(m => { if (!typesPresent.includes(m.type)) typesPresent.push(m.type); });
+  typesPresent.sort((a, b) => {
+    const ai = TYPE_ORDER.indexOf(a), bi = TYPE_ORDER.indexOf(b);
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+  });
 
   const cards = highlightItems.map(m => {
-    const linkHtml = m.link
+    // 보도(Newspaper Article)는 기사에 등장하는 회사명 등이 민감할 수 있어
+    // 교수님 요청으로 제목·본문을 블러 처리하고 원문 링크는 비활성화한다.
+    // 본인이 쓴 기고(op-ed)는 그대로 노출.
+    const isSensitive = m.type === 'article';
+    const linkHtml = (m.link && !isSensitive)
       ? ` <a href="${escapeHtml(m.link)}" target="_blank" rel="noopener">${escapeHtml(m.linkLabel || 'Link')}<span class="pub-link-icon" aria-hidden="true">&#8599;</span></a>`
       : '';
     const outlet = m.outlet ? `<span class="media-outlet">${escapeHtml(m.outlet)}</span>` : '';
+    const blurAttr = isSensitive ? ' class="media-blurred"' : '';
     return `        <div class="media-item fade-in" data-type="${escapeHtml(m.type)}">
           <div class="media-type-badge">${escapeHtml(MEDIA_TYPE_LABELS[m.type] || m.type)}</div>
           <div class="media-date">${escapeHtml(m.date)}</div>
           <div class="media-content">
-            <h3>${escapeHtml(m.title)}</h3>
+            <h3${blurAttr}>${escapeHtml(m.title)}</h3>
             ${outlet}
-            <p>${m.content || ''}${linkHtml}</p>
+            <p${blurAttr}>${m.content || ''}${linkHtml}</p>
           </div>
         </div>`;
   }).join('\n');
