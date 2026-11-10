@@ -457,6 +457,15 @@ const MEDIA_TYPE_LABELS = {
   'op-ed': 'Op-Ed'
 };
 
+// 필터 버튼에서만 쓰는 라벨 (교수님 요청: 전체를 나열한다는 인상 대신
+// "최신 기사 모음"이라는 뉘앙스를 은연중에 주기 위해 "Recent"를 붙임).
+// 카드 각각의 타입 배지(MEDIA_TYPE_LABELS)는 그대로 유지.
+const MEDIA_FILTER_LABELS = {
+  'article': 'Recent Newspaper Articles',
+  'video': 'Recent Videos',
+  'op-ed': 'Op-Ed'
+};
+
 function generateMediaHtml(items) {
   if (!items || items.length === 0) {
     return { html: '<p class="media-empty">No media items yet.</p>', filters: [] };
@@ -507,7 +516,7 @@ function generateMediaHtml(items) {
 function generateMediaFilterHtml(filters) {
   // "All" 버튼은 교수님 요청으로 제거. 첫 번째 타입(Op-Ed)을 기본 선택 상태로 보여준다.
   if (!filters || filters.length === 0) return '';
-  const buttons = filters.map((t, i) => `        <button type="button" class="media-filter${i === 0 ? ' active' : ''}" data-filter="${escapeHtml(t)}" aria-pressed="${i === 0 ? 'true' : 'false'}">${escapeHtml(MEDIA_TYPE_LABELS[t] || t)}</button>`);
+  const buttons = filters.map((t, i) => `        <button type="button" class="media-filter${i === 0 ? ' active' : ''}" data-filter="${escapeHtml(t)}" aria-pressed="${i === 0 ? 'true' : 'false'}">${escapeHtml(MEDIA_FILTER_LABELS[t] || MEDIA_TYPE_LABELS[t] || t)}</button>`);
   return buttons.join('\n');
 }
 
