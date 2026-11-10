@@ -459,10 +459,16 @@ function generateMediaHtml(items) {
   if (!items || items.length === 0) {
     return { html: '<p class="media-empty">No media items yet.</p>', filters: [] };
   }
-  const typesPresent = [];
-  items.forEach(m => { if (!typesPresent.includes(m.type)) typesPresent.push(m.type); });
+  // highlight (card) items vs. low-key "그 외 언론 보도" list items.
+  // item.highlight === false puts it in the modest plain-list block instead of a card;
+  // omitted/true (including all pre-existing items with no such field) stays a card.
+  const highlightItems = items.filter(m => m.highlight !== false);
+  const otherItems = items.filter(m => m.highlight === false);
 
-  const cards = items.map(m => {
+  const typesPresent = [];
+  highlightItems.forEach(m => { if (!typesPresent.includes(m.type)) typesPresent.push(m.type); });
+
+  const cards = highlightItems.map(m => {
     const linkHtml = m.link
       ? ` <a href="${escapeHtml(m.link)}" target="_blank" rel="noopener">${escapeHtml(m.linkLabel || 'Link')}<span class="pub-link-icon" aria-hidden="true">&#8599;</span></a>`
       : '';
@@ -478,7 +484,24 @@ function generateMediaHtml(items) {
         </div>`;
   }).join('\n');
 
-  return { html: cards, filters: typesPresent };
+  let otherHtml = '';
+  if (otherItems.length > 0) {
+    const rows = otherItems.map(m => {
+      const title = m.link
+        ? `<a href="${escapeHtml(m.link)}" target="_blank" rel="noopener">${escapeHtml(m.title)}</a>`
+        : escapeHtml(m.title);
+      const outlet = m.outlet ? ` <span class="media-other-outlet">(${escapeHtml(m.outlet)})</span>` : '';
+      return `          <li><span class="media-other-date">${escapeHtml(m.date)}</span> ${title}${outlet}</li>`;
+    }).join('\n');
+    otherHtml = `\n        <div class="media-other fade-in">
+          <h3 class="media-other-heading">그 외 언론 보도</h3>
+          <ul class="media-other-list">
+${rows}
+          </ul>
+        </div>`;
+  }
+
+  return { html: cards + otherHtml, filters: typesPresent };
 }
 
 function generateMediaFilterHtml(filters) {
