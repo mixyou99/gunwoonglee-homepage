@@ -4,6 +4,7 @@ const path = require('path');
 const DATA_PATH = path.join(__dirname, '..', 'data', 'content.json');
 const NEWS_PATH = path.join(__dirname, '..', 'data', 'news.json');
 const LAB_PATH = path.join(__dirname, '..', 'data', 'lab.json');
+const MEDIA_PATH = path.join(__dirname, '..', 'data', 'media.json');
 const INDEX_PATH = path.join(__dirname, '..', 'index.html');
 
 function escapeHtml(str) {
@@ -493,7 +494,8 @@ function generateMediaHtml(items) {
       const outlet = m.outlet ? ` <span class="media-other-outlet">(${escapeHtml(m.outlet)})</span>` : '';
       return `          <li><span class="media-other-date">${escapeHtml(m.date)}</span> ${title}${outlet}</li>`;
     }).join('\n');
-    otherHtml = `\n        <div class="media-other fade-in">
+    otherHtml = `\n        <!-- "그 외 언론 보도" 목록은 교수님 요청으로 현재 숨김 처리 (hidden 제거하면 복원) -->
+        <div class="media-other fade-in" hidden>
           <h3 class="media-other-heading">그 외 언론 보도</h3>
           <ul class="media-other-list">
 ${rows}
@@ -568,8 +570,10 @@ function build() {
   // news/labMembers는 CMS(학생 편집 가능 범위)가 다루는 별도 파일로 분리되어 있음 - 합쳐서 사용
   const newsData = JSON.parse(fs.readFileSync(NEWS_PATH, 'utf8'));
   const labData = JSON.parse(fs.readFileSync(LAB_PATH, 'utf8'));
+  const mediaData = JSON.parse(fs.readFileSync(MEDIA_PATH, 'utf8'));
   data.news = newsData.news;
   data.labMembers = labData.labMembers;
+  data.media = mediaData.media;
   let html = fs.readFileSync(INDEX_PATH, 'utf8');
 
   // Filter hidden items from all sections

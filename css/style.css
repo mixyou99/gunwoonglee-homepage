@@ -1073,6 +1073,10 @@ img {
   border-bottom: 1px solid var(--border);
 }
 
+.media-item[hidden] {
+  display: none;
+}
+
 .media-item:first-child {
   border-top: 1px solid var(--border);
 }
