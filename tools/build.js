@@ -460,63 +460,47 @@ function generateMediaHtml(items) {
   if (!items || items.length === 0) {
     return { html: '<p class="media-empty">No media items yet.</p>', filters: [] };
   }
-  // highlight (card) items vs. low-key "그 외 언론 보도" list items.
-  // item.highlight === false puts it in the modest plain-list block instead of a card;
-  // omitted/true (including all pre-existing items with no such field) stays a card.
-  const highlightItems = items.filter(m => m.highlight !== false);
-  const otherItems = items.filter(m => m.highlight === false);
+  // 교수님 요청으로 '그 외 언론 보도' 같은 별도 목록 구분 없이,
+  // hidden이 아닌 모든 보도/기고 항목을 동일한 카드 형태로 전부 나열한다.
+  const visibleItems = items.filter(m => !m.hidden);
 
   // 필터 버튼 순서: Op-Ed를 Newspaper Article보다 먼저 보여달라는 요청 반영
   const TYPE_ORDER = ['op-ed', 'article', 'video'];
   const typesPresent = [];
-  highlightItems.forEach(m => { if (!typesPresent.includes(m.type)) typesPresent.push(m.type); });
+  visibleItems.forEach(m => { if (!typesPresent.includes(m.type)) typesPresent.push(m.type); });
   typesPresent.sort((a, b) => {
     const ai = TYPE_ORDER.indexOf(a), bi = TYPE_ORDER.indexOf(b);
     return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
   });
 
-  const cards = highlightItems.map(m => {
+  const cards = visibleItems.map(m => {
     // 보도(Newspaper Article)는 기사에 등장하는 회사명 등이 민감할 수 있어
     // 교수님 요청으로 제목만 블러 처리하고, 원문 링크는 글자는 보이되 클릭은 막는다.
-    // 본문과 매체명은 그대로 노출. 본인이 쓴 기고(op-ed)는 전부 그대로 노출.
+    // 본문과 매체명은 그대로 노출. 본인이 쓴 기고(op-ed)는 전부 그대로 노출하되
+    // 날짜는 표시하지 않는다 (교수님 요청: 타이틀과 내용만).
     const isSensitive = m.type === 'article';
-    const linkHtml = m.link
+    const isOpEd = m.type === 'op-ed';
+    const linkInner = m.link
       ? (isSensitive
-        ? ` <span class="media-link-disabled" aria-disabled="true">${escapeHtml(m.linkLabel || 'Link')}<span class="pub-link-icon" aria-hidden="true">&#8599;</span></span>`
-        : ` <a href="${escapeHtml(m.link)}" target="_blank" rel="noopener">${escapeHtml(m.linkLabel || 'Link')}<span class="pub-link-icon" aria-hidden="true">&#8599;</span></a>`)
+        ? `<span class="media-link-disabled" aria-disabled="true">${escapeHtml(m.linkLabel || 'Read Article')}<span class="pub-link-icon" aria-hidden="true">&#8599;</span></span>`
+        : `<a href="${escapeHtml(m.link)}" target="_blank" rel="noopener">${escapeHtml(m.linkLabel || 'Read Article')}<span class="pub-link-icon" aria-hidden="true">&#8599;</span></a>`)
       : '';
+    const bodyText = m.content || '';
+    const linkHtml = linkInner ? `${bodyText ? ' ' : ''}${linkInner}` : '';
     const outlet = m.outlet ? `<span class="media-outlet">${escapeHtml(m.outlet)}</span>` : '';
     const blurAttr = isSensitive ? ' class="media-blurred"' : '';
+    const dateHtml = isOpEd ? '' : `\n          <div class="media-date">${escapeHtml(m.date)}</div>`;
     return `        <div class="media-item fade-in" data-type="${escapeHtml(m.type)}">
-          <div class="media-type-badge">${escapeHtml(MEDIA_TYPE_LABELS[m.type] || m.type)}</div>
-          <div class="media-date">${escapeHtml(m.date)}</div>
+          <div class="media-type-badge">${escapeHtml(MEDIA_TYPE_LABELS[m.type] || m.type)}</div>${dateHtml}
           <div class="media-content">
             <h3${blurAttr}>${escapeHtml(m.title)}</h3>
             ${outlet}
-            <p>${m.content || ''}${linkHtml}</p>
+            <p>${bodyText}${linkHtml}</p>
           </div>
         </div>`;
   }).join('\n');
 
-  let otherHtml = '';
-  if (otherItems.length > 0) {
-    const rows = otherItems.map(m => {
-      const title = m.link
-        ? `<a href="${escapeHtml(m.link)}" target="_blank" rel="noopener">${escapeHtml(m.title)}</a>`
-        : escapeHtml(m.title);
-      const outlet = m.outlet ? ` <span class="media-other-outlet">(${escapeHtml(m.outlet)})</span>` : '';
-      return `          <li><span class="media-other-date">${escapeHtml(m.date)}</span> ${title}${outlet}</li>`;
-    }).join('\n');
-    otherHtml = `\n        <!-- "그 외 언론 보도" 목록은 교수님 요청으로 현재 숨김 처리 (hidden 제거하면 복원) -->
-        <div class="media-other fade-in" hidden>
-          <h3 class="media-other-heading">그 외 언론 보도</h3>
-          <ul class="media-other-list">
-${rows}
-          </ul>
-        </div>`;
-  }
-
-  return { html: cards + otherHtml, filters: typesPresent };
+  return { html: cards, filters: typesPresent };
 }
 
 function generateMediaFilterHtml(filters) {
