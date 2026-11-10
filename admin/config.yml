@@ -11,9 +11,10 @@ publish_mode: editorial_workflow
 media_folder: "assets/uploads"
 public_folder: "/assets/uploads"
 
-# 편집 가능 범위: News, Lab 멤버 소개, Media(언론 보도) (세 가지로 제한)
-# 논문(Publications), CV, About, Research 등 나머지 데이터는 이 CMS에서 아예 보이지도, 건드릴 수도 없습니다.
-# (data/news.json, data/lab.json, data/media.json 파일만 다루도록 물리적으로 분리되어 있음)
+# 편집 가능 범위: News, Lab 멤버 소개, Media(언론 보도), Publications(논문 목록)
+# CV, About, Research 등 나머지 데이터는 이 CMS에서 아예 보이지도, 건드릴 수도 없습니다.
+# (data/news.json, data/lab.json, data/media.json, data/publications.json 파일만
+#  다루도록 물리적으로 분리되어 있음)
 collections:
   - name: "news"
     label: "News (소식·공지)"
@@ -80,4 +81,36 @@ collections:
               - { label: "기사 링크", name: "link", widget: "string", required: false, default: "" }
               - { label: "링크에 표시할 텍스트 (선택, 기본값 Read Article)", name: "linkLabel", widget: "string", required: false, default: "" }
               - { label: "대표 카드로 표시 (끄면 '그 외 언론 보도' 목록으로 내려감)", name: "highlight", widget: "boolean", default: true }
+              - { label: "사이트에서 숨기기", name: "hidden", widget: "boolean", default: false }
+
+  - name: "publications"
+    label: "Publications (논문 목록)"
+    files:
+      - name: "publications"
+        label: "논문 목록"
+        file: "data/publications.json"
+        fields:
+          - label: "논문 항목"
+            name: "publications"
+            widget: "list"
+            summary: "[{{fields.order}}] {{fields.type}} · {{fields.title}}"
+            fields:
+              - { label: "ID (새 항목 추가 시 기존 목록에서 가장 큰 숫자 + 1, 기존 항목 수정 시에는 그대로 둘 것)", name: "id", widget: "number", value_type: "int", required: false }
+              - label: "종류"
+                name: "type"
+                widget: "select"
+                required: false
+                options:
+                  - { label: "저널 논문 (Published)", value: "journal" }
+                  - { label: "저널 투고 중 (R&R / Under Review)", value: "working" }
+                  - { label: "워킹페이퍼 (Working Paper)", value: "wp" }
+                  - { label: "진행중 연구 (Work-in-Progress)", value: "progress" }
+                  - { label: "학회 발표 (Conference)", value: "conference" }
+              - { label: "정렬 순서 (숫자가 작을수록 위로 올라감 · 같은 종류 안에서만 비교됨)", name: "order", widget: "number", value_type: "int", required: false }
+              - { label: "연도 (예: 2026, 또는 R&R / Under Review / Working)", name: "year", widget: "string", required: false }
+              - { label: "제목", name: "title", widget: "string", required: false }
+              - { label: "저자", name: "authors", widget: "string", required: false }
+              - { label: "게재지 / 학회 정보", name: "venue", widget: "string", required: false, default: "" }
+              - { label: "수상 내역 (선택)", name: "award", widget: "string", required: false, default: "" }
+              - { label: "논문 링크 (선택)", name: "url", widget: "string", required: false, default: "" }
               - { label: "사이트에서 숨기기", name: "hidden", widget: "boolean", default: false }

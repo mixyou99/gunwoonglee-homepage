@@ -5,6 +5,7 @@ const DATA_PATH = path.join(__dirname, '..', 'data', 'content.json');
 const NEWS_PATH = path.join(__dirname, '..', 'data', 'news.json');
 const LAB_PATH = path.join(__dirname, '..', 'data', 'lab.json');
 const MEDIA_PATH = path.join(__dirname, '..', 'data', 'media.json');
+const PUBLICATIONS_PATH = path.join(__dirname, '..', 'data', 'publications.json');
 const INDEX_PATH = path.join(__dirname, '..', 'index.html');
 
 function escapeHtml(str) {
@@ -580,13 +581,16 @@ function replaceSection(html, startMarker, endMarker, newContent, indent) {
 
 function build() {
   const data = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
-  // news/labMembers는 CMS(학생 편집 가능 범위)가 다루는 별도 파일로 분리되어 있음 - 합쳐서 사용
+  // news/labMembers/media/publications는 CMS(교수님 편집 가능 범위)가 다루는
+  // 별도 파일로 분리되어 있음 - 합쳐서 사용
   const newsData = JSON.parse(fs.readFileSync(NEWS_PATH, 'utf8'));
   const labData = JSON.parse(fs.readFileSync(LAB_PATH, 'utf8'));
   const mediaData = JSON.parse(fs.readFileSync(MEDIA_PATH, 'utf8'));
+  const publicationsData = JSON.parse(fs.readFileSync(PUBLICATIONS_PATH, 'utf8'));
   data.news = newsData.news;
   data.labMembers = labData.labMembers;
   data.media = mediaData.media;
+  data.publications = publicationsData.publications;
   let html = fs.readFileSync(INDEX_PATH, 'utf8');
 
   // Filter hidden items from all sections
