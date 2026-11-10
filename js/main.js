@@ -158,10 +158,17 @@ document.querySelectorAll('.pub-group').forEach(group => {
 });
 
 // ===========================
-// Media: type filter (All / Newspaper Article / Video / Op-Ed)
+// Media: type filter (Newspaper Article / Video / Op-Ed) — no "All" button;
+// the first filter button starts active, so apply it on load too.
 // ===========================
 const mediaFilters = document.querySelectorAll('.media-filter');
 const mediaItems = document.querySelectorAll('.media-item');
+
+function applyMediaFilter(value) {
+  mediaItems.forEach(item => {
+    item.hidden = !(value === 'all' || item.dataset.type === value);
+  });
+}
 
 mediaFilters.forEach(filter => {
   filter.addEventListener('click', () => {
@@ -171,11 +178,13 @@ mediaFilters.forEach(filter => {
       f.classList.toggle('active', on);
       f.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
-    mediaItems.forEach(item => {
-      item.hidden = !(value === 'all' || item.dataset.type === value);
-    });
+    applyMediaFilter(value);
   });
 });
+
+if (mediaFilters.length > 0) {
+  applyMediaFilter(mediaFilters[0].dataset.filter);
+}
 
 // ===========================
 // Smooth scroll offset for fixed nav

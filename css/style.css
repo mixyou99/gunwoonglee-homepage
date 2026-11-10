@@ -1119,12 +1119,18 @@ img {
   line-height: 1.6;
 }
 
-/* 보도 기사 제목/본문 블러 처리 (회사명 등 민감한 내용 노출 방지, 날짜·매체명은 그대로 노출) */
-h3.media-blurred,
-p.media-blurred {
+/* 보도 기사 제목 블러 처리 (회사명 등 민감한 내용 노출 방지, 본문·날짜·매체명은 그대로 노출) */
+h3.media-blurred {
   filter: blur(6px);
   user-select: none;
   pointer-events: none;
+}
+
+/* 원문 링크: 글자는 보이되 클릭은 막음 */
+.media-link-disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .media-content a {
