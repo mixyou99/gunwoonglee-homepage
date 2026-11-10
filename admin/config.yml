@@ -79,5 +79,4 @@ collections:
               - { label: "요약 내용", name: "content", widget: "text", required: false, default: "" }
               - { label: "기사 링크", name: "link", widget: "string", required: false, default: "" }
               - { label: "링크에 표시할 텍스트 (선택, 기본값 Read Article)", name: "linkLabel", widget: "string", required: false, default: "" }
-              - { label: "대표 카드로 표시 (끄면 '그 외 언론 보도' 목록으로 내려감)", name: "highlight", widget: "boolean", default: true }
               - { label: "사이트에서 숨기기", name: "hidden", widget: "boolean", default: false }
