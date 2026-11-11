@@ -275,11 +275,30 @@
 
     .order-cell {
       display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .order-cell .order-arrows {
+      display: flex;
       flex-direction: column;
       gap: 2px;
     }
     .order-cell .btn-icon { padding: 2px 6px; line-height: 1; font-size: 11px; }
     .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .drag-handle {
+      cursor: grab;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1;
+      padding: 4px 2px;
+      user-select: none;
+      touch-action: none;
+    }
+    .drag-handle:hover { color: var(--text-secondary); }
+    tbody tr.dragging { opacity: 0.4; }
+    tbody tr.drag-over-top { box-shadow: inset 0 2px 0 0 var(--crimson); }
+    tbody tr.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--crimson); }
 
     .empty-state {
       text-align: center;
@@ -1456,11 +1475,19 @@
       empty.style.display = 'none';
 
       tbody.innerHTML = pubs.map((p, i) => `
-        <tr class="${p.hidden ? 'item-hidden' : ''}">
+        <tr class="${p.hidden ? 'item-hidden' : ''}" draggable="true" data-pub-id="${p.id}"
+            ondragstart="handlePubDragStart(event, ${p.id})"
+            ondragover="handlePubDragOver(event)"
+            ondragleave="handlePubDragLeave(event)"
+            ondrop="handlePubDrop(event, ${p.id})"
+            ondragend="handlePubDragEnd(event)">
           <td>
             <div class="order-cell">
-              <button class="btn btn-sm btn-icon" onclick="movePub(${p.id}, -1)" title="Move up" ${i === 0 ? 'disabled' : ''}>&#9650;</button>
-              <button class="btn btn-sm btn-icon" onclick="movePub(${p.id}, 1)" title="Move down" ${i === pubs.length - 1 ? 'disabled' : ''}>&#9660;</button>
+              <span class="drag-handle" title="드래그해서 순서 변경">&#9776;</span>
+              <div class="order-arrows">
+                <button class="btn btn-sm btn-icon" onclick="movePub(${p.id}, -1)" title="Move up" ${i === 0 ? 'disabled' : ''}>&#9650;</button>
+                <button class="btn btn-sm btn-icon" onclick="movePub(${p.id}, 1)" title="Move down" ${i === pubs.length - 1 ? 'disabled' : ''}>&#9660;</button>
+              </div>
             </div>
           </td>
           <td style="font-weight:600;white-space:nowrap;">${esc(p.year)}</td>
@@ -1494,6 +1521,73 @@
       const tmp = a.order;
       a.order = b.order;
       b.order = tmp;
+
+      renderPublications();
+      saveData();
+    }
+
+    // Drag & drop 순서 변경 (현재 필터/검색 결과 목록 내에서만 동작)
+    let draggedPubId = null;
+
+    function handlePubDragStart(e, id) {
+      draggedPubId = id;
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', String(id)); } catch (err) {}
+      e.currentTarget.classList.add('dragging');
+    }
+
+    function handlePubDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const row = e.currentTarget;
+      if (parseInt(row.dataset.pubId, 10) === draggedPubId) return;
+      const rect = row.getBoundingClientRect();
+      const isTopHalf = (e.clientY - rect.top) < rect.height / 2;
+      row.classList.toggle('drag-over-top', isTopHalf);
+      row.classList.toggle('drag-over-bottom', !isTopHalf);
+    }
+
+    function handlePubDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom');
+    }
+
+    function handlePubDragEnd(e) {
+      document.querySelectorAll('#pubTableBody tr').forEach(r => {
+        r.classList.remove('dragging', 'drag-over-top', 'drag-over-bottom');
+      });
+      draggedPubId = null;
+    }
+
+    function handlePubDrop(e, targetId) {
+      e.preventDefault();
+      const row = e.currentTarget;
+      const insertBefore = row.classList.contains('drag-over-top');
+      row.classList.remove('drag-over-top', 'drag-over-bottom');
+      if (draggedPubId === null || draggedPubId === targetId) return;
+      reorderPubsByDrag(draggedPubId, targetId, insertBefore);
+    }
+
+    // 드래그로 옮겨진 두 항목 사이의 모든 항목을 한 칸씩 밀어서,
+    // 현재 보이는 목록(필터/검색 결과) 안에서 기존 order 값들을 그대로 재배치한다.
+    function reorderPubsByDrag(draggedId, targetId, insertBefore) {
+      const visible = getFilteredPubs();
+      const orderValues = visible.map(p => p.order);
+
+      const fromIdx = visible.findIndex(p => p.id === draggedId);
+      let toIdx = visible.findIndex(p => p.id === targetId);
+      if (fromIdx === -1 || toIdx === -1) return;
+
+      const reordered = [...visible];
+      const [moved] = reordered.splice(fromIdx, 1);
+      // splice 이후 target 위치가 한 칸 당겨졌을 수 있으므로 다시 계산
+      toIdx = reordered.findIndex(p => p.id === targetId);
+      const insertIdx = insertBefore ? toIdx : toIdx + 1;
+      reordered.splice(insertIdx, 0, moved);
+
+      reordered.forEach((p, i) => {
+        const actual = data.publications.find(x => x.id === p.id);
+        if (actual) actual.order = orderValues[i];
+      });
 
       renderPublications();
       saveData();
