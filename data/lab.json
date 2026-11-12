@@ -47,7 +47,9 @@
       "topic": "Serialized Content Consumption",
       "pubs": [
         "Interaction Effort & User Engagement in Live-streaming (Working Paper)",
-        "Revenue-based Recommender Systems & User Search (Work in Progress)"
+        "Revenue-based Recommender Systems & User Search (Work in Progress)",
+        "Platform Early Settlement and Financial Stability among Digital Small and Medium-sized Enterprises (Information Systems Review, 2026)",
+        "Creator Behavior and Multi-Tiered Viewer Engagement: Disentangling the Relational Dynamics of Live-streaming (KMIS 2025)"
       ],
       "status": "alumni",
       "placement": "PhD Student, Carnegie Mellon University",
@@ -71,7 +73,10 @@
       "name": "Seonyoung Lee",
       "degree": "MS",
       "topic": "AI Advertising Product Portfolio",
-      "pubs": [],
+      "pubs": [
+        "When Does AI Advertising Create Value? Dynamic Funnel-Stage Effects in a Platform Marketplace (Target Journal: Journal of Advertising)",
+        "When Does AI Advertising Create Value? Dynamic Funnel-Stage Effects in a Platform Marketplace (Best Paper, KMIS 2026)"
+      ],
       "status": "current",
       "placement": ""
     },
@@ -106,7 +111,8 @@
       "degree": "MS",
       "topic": "Network Neutrality & Streaming Platforms",
       "pubs": [
-        "Network Neutrality Violation on the Streaming Platform Ecosystem (ICIS 2023)"
+        "Network Neutrality Violation on the Streaming Platform Ecosystem (ICIS 2023)",
+        "Governing Value Creation on Livestreaming Platforms: Intervention, Pricing, and Platform Design (Journal of Management Information Systems, 2026)"
       ],
       "status": "alumni",
       "placement": "PhD Student, George Washington University",
@@ -168,7 +174,9 @@
       "name": "Seunghun Lee",
       "degree": "MS",
       "topic": "",
-      "pubs": [],
+      "pubs": [
+        "The Impact of Service Quality Signals on the Success of Online Food Delivery Services on O2O Platforms (Information Systems Review, 2022)"
+      ],
       "status": "alumni",
       "placement": "Korea Deposit Insurance Corporation",
       "gradYear": "2022"
@@ -178,7 +186,9 @@
       "name": "JeeHee Kim",
       "degree": "MS",
       "topic": "",
-      "pubs": [],
+      "pubs": [
+        "Understanding the Key Factors Influencing the Success of Sharing Accommodation Services: Evidence from Airbnb.com (Information Systems Review, 2019)"
+      ],
       "status": "alumni",
       "placement": "Own Business, Korea",
       "gradYear": "2019"
