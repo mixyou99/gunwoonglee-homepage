@@ -9,7 +9,12 @@
         "Live Streaming Commerce Spillovers in Digital Retail (ICIS 2025)",
         "Strategic Category Migration on Online Platforms (ICIS 2024)",
         "Impact of Bike-Sharing Services on Local Business (ICIS 2023)",
-        "Service Quality Signals on O2O Platforms (ISR, 2022)"
+        "Service Quality Signals on O2O Platforms (ISR, 2022)",
+        "Platform Early Settlement and Financial Stability among Digital Small and Medium-sized Enterprises (Information Systems Review, 2026)",
+        "Beyond Discovery: Personalized Recommender Systems and Re-Entry Decision Support in Serialized Digital Content (Under Review, Journal of the Association for Information Systems)",
+        "Review Systems as Trust-Governance Mechanisms in Electronic Commerce (Under Review, Information & Management)",
+        "Creator-Audience Affective Correspondence in Livestreaming Creator Commerce (Under Review, Information & Management)",
+        "Freemium Strategy and Recommendations for Serialized Content (Work in Progress)"
       ],
       "status": "current",
       "placement": ""
@@ -23,7 +28,14 @@
         "Open APIs of Stock Market & Foreign Investors (PACIS 2025)",
         "Financial APIs & Retail Investors (ICIS 2024)",
         "Dynamics of Digital Customer Experience Journey (PACIS 2024)",
-        "Data Acquisition for Mobile App Software (ISR, 2025)"
+        "Data Acquisition for Mobile App Software (ISR, 2025)",
+        "Platform Early Settlement and Financial Stability among Digital Small and Medium-sized Enterprises (Information Systems Review, 2026)",
+        "Decomposing Information Acquisition Cost: Technical Access and Processing Capability Barriers in Cross-Border Electronic Disclosure Systems (Under Review, Information Systems Research)",
+        "Expanding the Operating Frontier: AI Advertising Tools and Demand-Generation Operations in Platform Marketplaces (Under Review, Production and Operations Management)",
+        "When More Is Less: An Information Overload Perspective on Video Product Reviews (R&R, Decision Support Systems)",
+        "An OCR-free, Position-aware VLM Process for Semi-structured Business Document Structuring (Under Review, Information Processing & Management)",
+        "Comparability Without Equivalence: Privacy Governance Boundaries and Market Standing on Digital Platforms (Under Review, International Journal of Electronic Commerce)",
+        "Rare but Release-Coupled: Privacy-Disclosure Reconfiguration in Digital Product Evolution (Journal Working Paper, Production and Operations Management)"
       ],
       "status": "current",
       "placement": ""
@@ -36,7 +48,11 @@
       "pubs": [
         "Impacts of Virtual Queue Services on Local Businesses (INFORMS 2025, SCECR 2025)",
         "Best Paper at Post-ICIS KrAIS Workshop 2024",
-        "Best Paper at PACIS 2026"
+        "Best Paper at PACIS 2026",
+        "Platform Early Settlement and Financial Stability among Digital Small and Medium-sized Enterprises (Information Systems Review, 2026)",
+        "When More Is Less: An Information Overload Perspective on Video Product Reviews (R&R, Decision Support Systems)",
+        "Review Systems as Trust-Governance Mechanisms in Electronic Commerce (Under Review, Information & Management)",
+        "Invisible Redistribution: How Virtual Queues Increase Nearby Transactions Without Detectable Population Flow (Journal Working Paper, Management Science)"
       ],
       "status": "current",
       "placement": ""
@@ -125,7 +141,8 @@
       "degree": "MS",
       "topic": "Digital Piracy & Live Content",
       "pubs": [
-        "Live Sports Broadcasting, Digital Piracy & Societal Consequences (HICSS 2024)"
+        "Live Sports Broadcasting, Digital Piracy & Societal Consequences (HICSS 2024)",
+        "Digital Piracy of Live Content and Illegal Online Gambling: Evidence from Live Sports Broadcasting (Journal Working Paper, Journal of Management Information Systems)"
       ],
       "status": "alumni",
       "placement": "PhD Student, Mississippi State University",
@@ -233,11 +250,7 @@
       "name": "Jonghan Park",
       "degree": "MSBA",
       "topic": "",
-      "pubs": [
-        "What Algorithms Leave Behind: How Automatic Matching Reshapes Worker Capability in Ride-Hailing Platforms (ICIS 2026)",
-        "Expanding the Operating Frontier: AI Advertising Tools and Demand-Generation Operations in Platform Marketplaces (Under Review, Production and Operations Management)",
-        "Unintended Consequences of Algorithmic Management: Evidence from Automatic Matching Systems in Ride-Hailing Platforms (PACIS 2026)"
-      ],
+      "pubs": [],
       "status": "alumni",
       "placement": "E&Y Consulting, Korea",
       "gradYear": "2021"
@@ -267,9 +280,7 @@
       "name": "Heeseok Kim",
       "degree": "MSBA",
       "topic": "",
-      "pubs": [
-        "Predicting Ethereum Prices with Machine Learning Based on Blockchain Information (Expert Systems with Applications, 2021)"
-      ],
+      "pubs": [],
       "status": "alumni",
       "placement": "Start-up, Korea",
       "gradYear": "2024"
@@ -289,11 +300,7 @@
       "name": "Dasom Lee",
       "degree": "MSBA",
       "topic": "",
-      "pubs": [
-        "The Impact of Qualitative Feedback on Driver Behavior in Mobility Platforms (Information Systems Review, 2026)",
-        "What Algorithms Leave Behind: How Automatic Matching Reshapes Worker Capability in Ride-Hailing Platforms (ICIS 2026)",
-        "Mobile Location-based Recommendation Systems and Local Economy: Evidence from the Restaurant Industry (KrAIS Summer Workshop 2022)"
-      ],
+      "pubs": [],
       "status": "alumni",
       "placement": "Multi Campus, Korea",
       "gradYear": "2025"
@@ -303,11 +310,7 @@
       "name": "Ayoung Kim",
       "degree": "MSBA",
       "topic": "",
-      "pubs": [
-        "When Does AI Advertising Create Value? Dynamic Funnel-Stage Effects in a Platform Marketplace (Best Paper, KMIS 2026)",
-        "An Exploratory Study on Consumers' Media and Channel Choices throughout the Consumer Decision Journey (Journal of Korea Advertising Society, 2022)",
-        "Consumer Perception on Smart Product Innovation: Evidence from Smartphones (Korean Journal of Business Administration, 2020)"
-      ],
+      "pubs": [],
       "status": "alumni",
       "placement": "Coupang Eats, Korea",
       "gradYear": "2025"
