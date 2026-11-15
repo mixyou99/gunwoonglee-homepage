@@ -280,10 +280,12 @@ img {
 }
 
 .hero-name-kr {
-  font-size: 1.5rem;
+  font-family: 'Gowun Batang', 'Noto Serif KR', 'Batang', serif;
+  font-size: 1.6rem;
   color: var(--text-secondary);
+  letter-spacing: 0.2em;
   margin-bottom: 24px;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .hero-affiliation {
