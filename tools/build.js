@@ -173,7 +173,7 @@ ${indentBlock(body, 2)}
 // 학생 이름 ↔ 같이 쓴 논문 매칭 (성 + 이름 첫 글자로 매칭, 흔한 성+이니셜 충돌은 수동 보정)
 const MEMBER_PUB_OVERRIDE_INCLUDE = {
   'Seunghun Lee': [4],
-  'Seonyoung Lee': [82, 98, 99, 102],
+  'Seonyoung Lee': [82, 98, 218, 220, 99],
   // MSBA alumni (professional track, no co-authored research listed in CV) —
   // force zero matches since last-name+initial matching produces false
   // positives against unrelated authors with common Korean surnames.
